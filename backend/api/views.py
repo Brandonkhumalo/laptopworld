@@ -10,11 +10,11 @@ import hashlib
 import time
 import json
 
-from .models import Category, Product, ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem, DeliverySettings
 from .serializers import (
     CategorySerializer, ProductSerializer, DealSerializer,
     TopPickSerializer, CartItemSerializer, CartSerializer,
-    OrderSerializer, ProductImageSerializer
+    OrderSerializer, ProductImageSerializer, DeliverySettingsSerializer
 )
 
 admin_tokens = {}
@@ -273,18 +273,24 @@ def checkout(request):
     customer_phone = request.data.get('customer_phone')
     fulfillment_type = request.data.get('fulfillment_type')
     delivery_address = request.data.get('delivery_address', '')
+    delivery_lat = request.data.get('delivery_lat')
+    delivery_lng = request.data.get('delivery_lng')
+    delivery_fee = request.data.get('delivery_fee', 0)
     notes = request.data.get('notes', '')
 
     if not all([customer_name, customer_email, customer_phone, fulfillment_type]):
         return Response({'error': 'Missing required fields'}, status=400)
 
-    total = 0
+    if fulfillment_type == 'delivery' and not delivery_address:
+        return Response({'error': 'Delivery address is required'}, status=400)
+
+    subtotal = 0
     order_items_data = []
     for cart_item in items:
         product = cart_item.product
         price = product.deal_price if product.deal_price else product.price
         item_total = price * cart_item.quantity
-        total += item_total
+        subtotal += item_total
         order_items_data.append({
             'product': product,
             'product_name': product.name,
@@ -292,12 +298,25 @@ def checkout(request):
             'price': price,
         })
 
+    actual_delivery_fee = 0
+    if fulfillment_type == 'delivery':
+        from decimal import Decimal
+        settings = DeliverySettings.get_settings()
+        actual_delivery_fee = Decimal(str(delivery_fee))
+        if actual_delivery_fee not in [settings.harare_fee, settings.outside_harare_fee]:
+            actual_delivery_fee = settings.outside_harare_fee
+
+    total = subtotal + actual_delivery_fee
+
     order = Order.objects.create(
         customer_name=customer_name,
         customer_email=customer_email,
         customer_phone=customer_phone,
         fulfillment_type=fulfillment_type,
         delivery_address=delivery_address,
+        delivery_lat=delivery_lat,
+        delivery_lng=delivery_lng,
+        delivery_fee=actual_delivery_fee,
         total=total,
         notes=notes,
         status='awaiting_payment',
@@ -427,3 +446,34 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = new_status
         order.save()
         return Response(OrderSerializer(order).data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def get_delivery_settings(request):
+    settings = DeliverySettings.get_settings()
+    return Response(DeliverySettingsSerializer(settings).data)
+
+
+@api_view(['PUT'])
+def update_delivery_settings(request):
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if token not in admin_tokens:
+        return Response({'error': 'Unauthorized'}, status=401)
+
+    settings = DeliverySettings.get_settings()
+    serializer = DeliverySettingsSerializer(settings, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def get_maps_api_key(request):
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    key = os.environ.get('Maps_Api', '')
+    return Response({'key': key})

@@ -93,6 +93,11 @@ export const api = {
   },
   checkout: (data: object) => apiFetch('/checkout/', { method: 'POST', body: JSON.stringify(data) }),
   paymentStatus: (orderNumber: string) => apiFetch(`/payment/status/${orderNumber}/`),
+  deliverySettings: {
+    get: () => apiFetch('/delivery-settings/'),
+    update: (data: object) => apiFetch('/delivery-settings/update/', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+  mapsKey: () => apiFetch('/maps-key/'),
   orders: {
     list: (params?: { status?: string; fulfillment_type?: string; search?: string }) => {
       const qs = new URLSearchParams();

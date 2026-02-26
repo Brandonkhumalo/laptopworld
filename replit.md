@@ -24,7 +24,7 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 ## Project Structure
 
 ### Frontend (`src/`)
-- `components/` - Reusable UI components (Navbar with hover dropdowns, ProductCard with wishlist, FeaturedProducts, Categories, CountdownBanner, HeroSection, Footer)
+- `components/` - Reusable UI components (Navbar with hover dropdowns, ProductCard with wishlist, FeaturedProducts, Categories, CountdownBanner, HeroSection, Footer, AddressPicker)
   - `ui/` - shadcn/ui primitive components
 - `pages/` - Page-level route components
   - `Index.tsx` - Home page with hero, featured products, categories, deals banner (sections hide when no data)
@@ -32,10 +32,10 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
   - `DealsPage.tsx` - Active deals listing
   - `CategoryPage.tsx` - Products filtered by category
   - `ProductPage.tsx` - Product detail with image gallery, key features, tabs (About/Specifications), sticky pricing sidebar
-  - `CartPage.tsx` - Cart with checkout flow (delivery/collection)
+  - `CartPage.tsx` - Cart with checkout flow (delivery with Google Maps address picker / collection), delivery fee display
   - `WishlistPage.tsx` - Saved items page
   - `AdminLogin.tsx` - Admin login page
-  - `AdminDashboard.tsx` - Full admin panel (categories with types, products with structured specs, top picks, deals, orders)
+  - `AdminDashboard.tsx` - Full admin panel (categories with types, products with structured specs, top picks, deals, orders, delivery fee settings)
 - `hooks/use-cart.tsx` - Cart provider with API sync
 - `hooks/use-wishlist.tsx` - Wishlist provider with localStorage persistence
 - `lib/api.ts` - Centralized API layer communicating with Django backend
@@ -45,11 +45,12 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 ### Backend (`backend/`)
 - `config/` - Django project settings
 - `api/` - Main API app
-  - `models.py` - Category (with category_type), Product (with key_features, brand, condition, warranty), ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem
+  - `models.py` - Category (with category_type), Product (with key_features, brand, condition, warranty), ProductImage, Deal, TopPick, Cart, CartItem, Order (with delivery_lat, delivery_lng, delivery_fee), OrderItem, DeliverySettings
   - `views.py` - REST API viewsets and custom actions (multi-image upload support)
   - `serializers.py` - DRF serializers
   - `urls.py` - API URL routing
   - `middleware.py` - CSRF exemption for API routes
+  - `services.py` - Paynow payment and Resend email services
 
 ## API Endpoints
 - `GET/POST /api/categories/` - Category CRUD (includes category_type: phone/laptop/smartwatch/accessory/other)
@@ -60,7 +61,7 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - `GET /api/cart/` - Get cart (uses X-Cart-Session header)
 - `POST /api/cart/add/` - Add to cart
 - `PUT/DELETE /api/cart/item/<id>/` - Update/remove cart item
-- `POST /api/checkout/` - Create order and initiate Paynow payment (returns redirect_url)
+- `POST /api/checkout/` - Create order and initiate Paynow payment (includes delivery_lat, delivery_lng, delivery_fee)
 - `GET /api/payment/return/` - Paynow return URL (redirects to /payment-status/:orderNumber)
 - `POST /api/payment/result/` - Paynow server-to-server callback
 - `GET /api/payment/status/<order_number>/` - Check payment status (polls Paynow)
@@ -68,13 +69,16 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - `POST /api/orders/<id>/update_status/` - Update order status
 - `POST /api/auth/login/` - Admin login (returns Bearer token)
 - `GET /api/auth/check/` - Verify auth status
+- `GET /api/delivery-settings/` - Get delivery fee settings (public)
+- `PUT /api/delivery-settings/update/` - Update delivery fees (admin only)
+- `GET /api/maps-key/` - Get Google Maps API key for frontend
 
 ## Running
 - Workflow "Django Backend" runs `cd backend && python manage.py runserver 0.0.0.0:8000`
 - Workflow "Start application" runs `npm run dev` on port 5000
 
 ## Key Features
-- Admin dashboard with tabs: Categories, Products, Top Picks, Deals, Online Purchases
+- Admin dashboard with tabs: Categories, Products, Top Picks, Deals, Online Purchases, Delivery Fees
 - Category types (phone/laptop/smartwatch/accessory/other) drive specification field templates
 - Product form shows structured spec fields based on category type (not raw JSON)
 - Multiple product images (up to 8) with gallery view on product page
@@ -91,6 +95,10 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - Successful payment: stock subtracted, confirmation emails sent via Resend
 - Order statuses: awaiting_payment -> paid -> processing -> delivered/collected
 - Checkout with delivery/collection options
+- Google Maps address picker for delivery with autocomplete (restricted to Zimbabwe)
+- Delivery fee settings: admin-configurable Harare vs outside Harare fees
+- Harare detection via ~30km radius from city center
+- Delivery coordinates stored with orders, admin can view on Google Maps
 - Order management with status tracking
 - Deal pricing with automatic discount badges
 - Dynamic footer (categories fetched from API)
@@ -113,4 +121,5 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - `Paynow_IntegrationKey` - Paynow Zimbabwe integration key
 - `ResendEmailApiKey` - Resend email API key
 - `Destination` - Admin notification email address
+- `Maps_Api` - Google Maps API key (used for address picker in checkout)
 - `VITE_API_URL` - Override backend URL (defaults to http://localhost:8000)

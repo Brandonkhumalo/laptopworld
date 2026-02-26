@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product, ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem, DeliverySettings
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -97,6 +97,13 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'order_number', 'customer_name', 'customer_email',
-                  'customer_phone', 'delivery_address', 'fulfillment_type',
+                  'customer_phone', 'delivery_address', 'delivery_lat', 'delivery_lng',
+                  'delivery_fee', 'fulfillment_type',
                   'status', 'total', 'notes', 'items', 'payment_confirmed',
                   'created_at', 'updated_at']
+
+
+class DeliverySettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliverySettings
+        fields = ['harare_fee', 'outside_harare_fee']

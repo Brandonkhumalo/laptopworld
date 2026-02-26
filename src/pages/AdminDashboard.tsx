@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { getSpecSections } from "@/lib/specTemplates";
-import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon } from "lucide-react";
+import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon, Truck, MapPin, DollarSign } from "lucide-react";
 import logoImg from "@assets/laptop_world-removebg-preview_1772088385331.png";
 
 const API_BASE = '';
 
-type Tab = 'categories' | 'products' | 'top-picks' | 'deals' | 'orders';
+type Tab = 'categories' | 'products' | 'top-picks' | 'deals' | 'orders' | 'delivery';
 
 interface Category { id: number; name: string; icon: string; category_type: string; product_count: number }
 interface ProductImage { id: number; image: string; order: number }
@@ -15,7 +15,7 @@ interface Product { id: number; name: string; category: number; category_name: s
 interface Deal { id: number; product: number; product_name: string; deal_price: string; save_percentage: string; active: boolean }
 interface TopPick { id: number; product: Product; order: number; active: boolean }
 interface OrderItem { id: number; product_name: string; quantity: number; price: string }
-interface Order { id: number; order_number: string; customer_name: string; customer_email: string; customer_phone: string; delivery_address: string; fulfillment_type: string; status: string; total: string; items: OrderItem[]; created_at: string }
+interface Order { id: number; order_number: string; customer_name: string; customer_email: string; customer_phone: string; delivery_address: string; delivery_lat: number | null; delivery_lng: number | null; delivery_fee: string; fulfillment_type: string; status: string; total: string; items: OrderItem[]; created_at: string }
 
 const categoryNameMap: Record<string, { icon: string; type: string }> = {
   'phones': { icon: 'Smartphone', type: 'phone' },
@@ -85,6 +85,7 @@ const AdminDashboard = () => {
     { key: 'top-picks', label: "Top Picks", icon: Star },
     { key: 'deals', label: 'Deals', icon: Percent },
     { key: 'orders', label: 'Online Purchases', icon: ShoppingBag },
+    { key: 'delivery', label: 'Delivery Fees', icon: Truck },
   ];
 
   return (
@@ -123,6 +124,7 @@ const AdminDashboard = () => {
         {activeTab === 'top-picks' && <TopPicksPanel />}
         {activeTab === 'deals' && <DealsPanel />}
         {activeTab === 'orders' && <OrdersPanel />}
+        {activeTab === 'delivery' && <DeliverySettingsPanel />}
       </div>
     </div>
   );
@@ -763,7 +765,24 @@ function OrdersPanel() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-muted-foreground">Email:</span> {order.customer_email}</div>
                   <div><span className="text-muted-foreground">Phone:</span> {order.customer_phone}</div>
-                  {order.delivery_address && <div className="col-span-2"><span className="text-muted-foreground">Address:</span> {order.delivery_address}</div>}
+                  {order.delivery_address && (
+                    <div className="col-span-2 space-y-1">
+                      <div><span className="text-muted-foreground">Address:</span> {order.delivery_address}</div>
+                      {order.delivery_lat && order.delivery_lng && (
+                        <a
+                          href={`https://www.google.com/maps?q=${order.delivery_lat},${order.delivery_lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
+                        >
+                          <MapPin className="h-3 w-3" /> View on Google Maps
+                        </a>
+                      )}
+                      {parseFloat(order.delivery_fee) > 0 && (
+                        <div><span className="text-muted-foreground">Delivery Fee:</span> <span className="font-medium">${order.delivery_fee}</span></div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -797,6 +816,103 @@ function OrdersPanel() {
           </div>
         ))}
         {orders.length === 0 && <p className="text-center text-muted-foreground py-8">No orders yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+function DeliverySettingsPanel() {
+  const [harareFee, setHarareFee] = useState('');
+  const [outsideHarareFee, setOutsideHarareFee] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.deliverySettings.get().then((data: { harare_fee: string; outside_harare_fee: string }) => {
+      setHarareFee(data.harare_fee);
+      setOutsideHarareFee(data.outside_harare_fee);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.deliverySettings.update({
+        harare_fee: harareFee,
+        outside_harare_fee: outsideHarareFee,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert('Failed to save delivery settings');
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div>
+      <h2 className="font-display text-xl font-bold text-foreground mb-4" data-testid="text-delivery-panel">Delivery Fee Settings</h2>
+      <p className="text-sm text-muted-foreground mb-6">Set delivery fees for orders within Harare and outside Harare. These fees will be shown to customers during checkout when they choose delivery.</p>
+
+      <div className="max-w-md space-y-6">
+        <div className="rounded-xl bg-card border border-border p-6 shadow-product space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-accent/10">
+              <MapPin className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Harare Delivery</h3>
+              <p className="text-xs text-muted-foreground">Within ~30km of Harare city center</p>
+            </div>
+          </div>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={harareFee}
+              onChange={(e) => setHarareFee(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2.5 text-sm"
+              placeholder="5.00"
+              data-testid="input-harare-fee"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-card border border-border p-6 shadow-product space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <Truck className="h-5 w-5 text-orange-500" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Outside Harare</h3>
+              <p className="text-xs text-muted-foreground">All other locations in Zimbabwe</p>
+            </div>
+          </div>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={outsideHarareFee}
+              onChange={(e) => setOutsideHarareFee(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2.5 text-sm"
+              placeholder="15.00"
+              data-testid="input-outside-harare-fee"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full gradient-accent py-2.5 rounded-lg font-semibold text-secondary-foreground disabled:opacity-50 flex items-center justify-center gap-2"
+          data-testid="button-save-delivery-settings"
+        >
+          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Delivery Fees'}
+        </button>
       </div>
     </div>
   );

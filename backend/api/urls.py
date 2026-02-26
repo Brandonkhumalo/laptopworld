@@ -23,4 +23,7 @@ urlpatterns = [
     path('payment/return/', views.payment_return),
     path('payment/result/', views.payment_result),
     path('payment/status/<str:order_number>/', views.payment_status),
+    path('delivery-settings/', views.get_delivery_settings),
+    path('delivery-settings/update/', views.update_delivery_settings),
+    path('maps-key/', views.get_maps_api_key),
 ]

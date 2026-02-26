@@ -140,6 +140,9 @@ class Order(models.Model):
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=20)
     delivery_address = models.TextField(blank=True)
+    delivery_lat = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    delivery_lng = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     fulfillment_type = models.CharField(max_length=20, choices=FULFILLMENT_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='awaiting_payment')
     total = models.DecimalField(max_digits=12, decimal_places=2)
@@ -161,6 +164,24 @@ class Order(models.Model):
             import random
             self.order_number = f"LW-{random.randint(100000, 999999)}"
         super().save(*args, **kwargs)
+
+
+class DeliverySettings(models.Model):
+    harare_fee = models.DecimalField(max_digits=10, decimal_places=2, default=5.00)
+    outside_harare_fee = models.DecimalField(max_digits=10, decimal_places=2, default=15.00)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Delivery Settings'
+        verbose_name_plural = 'Delivery Settings'
+
+    def __str__(self):
+        return f"Delivery: Harare ${self.harare_fee}, Outside ${self.outside_harare_fee}"
+
+    @classmethod
+    def get_settings(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
 
 
 class OrderItem(models.Model):
