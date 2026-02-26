@@ -92,6 +92,7 @@ export const api = {
     remove: (itemId: number) => apiFetch(`/cart/item/${itemId}/remove/`, { method: 'DELETE' }),
   },
   checkout: (data: object) => apiFetch('/checkout/', { method: 'POST', body: JSON.stringify(data) }),
+  paymentStatus: (orderNumber: string) => apiFetch(`/payment/status/${orderNumber}/`),
   orders: {
     list: (params?: { status?: string; fulfillment_type?: string; search?: string }) => {
       const qs = new URLSearchParams();

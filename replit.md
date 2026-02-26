@@ -60,7 +60,10 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - `GET /api/cart/` - Get cart (uses X-Cart-Session header)
 - `POST /api/cart/add/` - Add to cart
 - `PUT/DELETE /api/cart/item/<id>/` - Update/remove cart item
-- `POST /api/checkout/` - Create order from cart
+- `POST /api/checkout/` - Create order and initiate Paynow payment (returns redirect_url)
+- `GET /api/payment/return/` - Paynow return URL (redirects to /payment-status/:orderNumber)
+- `POST /api/payment/result/` - Paynow server-to-server callback
+- `GET /api/payment/status/<order_number>/` - Check payment status (polls Paynow)
 - `GET /api/orders/` - List orders (admin only)
 - `POST /api/orders/<id>/update_status/` - Update order status
 - `POST /api/auth/login/` - Admin login (returns Bearer token)
@@ -83,6 +86,10 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - Wishlist system with localStorage persistence, heart icon on product cards and detail page
 - Product search across product names, category names, and descriptions
 - Persistent cart with session-based tracking
+- Paynow Zimbabwe payment integration (live account)
+- Checkout redirects to Paynow, returns to payment status page
+- Successful payment: stock subtracted, confirmation emails sent via Resend
+- Order statuses: awaiting_payment -> paid -> processing -> delivered/collected
 - Checkout with delivery/collection options
 - Order management with status tracking
 - Deal pricing with automatic discount badges
@@ -101,5 +108,9 @@ Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. 
 - Password: laptopworld@admin
 - Login at: /admin
 
-## Environment
+## Environment (backend/.env)
+- `Paynow_IntegrationID` - Paynow Zimbabwe integration ID
+- `Paynow_IntegrationKey` - Paynow Zimbabwe integration key
+- `ResendEmailApiKey` - Resend email API key
+- `Destination` - Admin notification email address
 - `VITE_API_URL` - Override backend URL (defaults to http://localhost:8000)

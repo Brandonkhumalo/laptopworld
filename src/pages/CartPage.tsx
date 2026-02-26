@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Minus, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Minus, Plus, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { api } from "@/lib/api";
 import Navbar from "@/components/Navbar";
@@ -13,50 +13,30 @@ const CartPage = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [formData, setFormData] = useState({ customer_name: '', customer_email: '', customer_phone: '', fulfillment_type: 'collection', delivery_address: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
-  const [orderResult, setOrderResult] = useState<{ order_number: string } | null>(null);
-  const navigate = useNavigate();
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const result = await api.checkout(formData);
-      setOrderResult(result);
       refreshCart();
+
+      if (result.redirect_url) {
+        window.location.href = result.redirect_url;
+      }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Checkout failed');
-    } finally {
+      alert(err instanceof Error ? err.message : 'Checkout failed. Please try again.');
       setSubmitting(false);
     }
   };
-
-  if (orderResult) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="rounded-xl bg-card border border-border p-8 shadow-product max-w-md mx-auto">
-            <div className="rounded-full bg-success/20 p-4 w-fit mx-auto mb-4">
-              <svg className="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            </div>
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2" data-testid="text-order-success">Order Placed!</h1>
-            <p className="text-muted-foreground mb-4">Your order number is <strong className="text-accent" data-testid="text-order-number">{orderResult.order_number}</strong></p>
-            <p className="text-sm text-muted-foreground mb-6">We'll be in touch via email or phone with updates.</p>
-            <Link to="/" className="gradient-accent px-6 py-2.5 rounded-lg font-medium text-secondary-foreground inline-block" data-testid="link-continue-shopping">Continue Shopping</Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6" data-testid="button-back">
-          <ArrowLeft className="h-4 w-4" /> Back
-        </button>
+        <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6" data-testid="button-back">
+          <ArrowLeft className="h-4 w-4" /> Back to Shop
+        </Link>
 
         <h1 className="font-display text-2xl font-bold text-foreground mb-6" data-testid="text-cart-title">Your Cart</h1>
 
@@ -113,6 +93,7 @@ const CartPage = () => {
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <form onSubmit={handleCheckout} className="bg-card rounded-xl border border-border p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-xl space-y-4" data-testid="form-checkout">
               <h2 className="font-display text-xl font-bold text-foreground">Checkout</h2>
+              <p className="text-sm text-muted-foreground">You will be redirected to Paynow to complete your payment.</p>
               <input value={formData.customer_name} onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })} placeholder="Full name" required className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm" data-testid="input-checkout-name" />
               <input type="email" value={formData.customer_email} onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })} placeholder="Email address" required className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm" data-testid="input-checkout-email" />
               <input type="tel" value={formData.customer_phone} onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })} placeholder="Phone number" required className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm" data-testid="input-checkout-phone" />
@@ -139,8 +120,15 @@ const CartPage = () => {
 
               <div className="flex gap-3">
                 <button type="button" onClick={() => setShowCheckout(false)} className="flex-1 py-2.5 rounded-lg border border-border font-medium text-sm" data-testid="button-cancel-checkout">Cancel</button>
-                <button type="submit" disabled={submitting} className="flex-1 gradient-accent py-2.5 rounded-lg font-semibold text-secondary-foreground disabled:opacity-50" data-testid="button-place-order">
-                  {submitting ? 'Placing Order...' : `Place Order — $${getTotal().toFixed(2)}`}
+                <button type="submit" disabled={submitting} className="flex-1 gradient-accent py-2.5 rounded-lg font-semibold text-secondary-foreground disabled:opacity-50 flex items-center justify-center gap-2" data-testid="button-place-order">
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    `Pay $${getTotal().toFixed(2)}`
+                  )}
                 </button>
               </div>
             </form>

@@ -122,7 +122,8 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
+        ('awaiting_payment', 'Awaiting Payment'),
+        ('paid', 'Paid'),
         ('processing', 'Processing'),
         ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
@@ -140,9 +141,12 @@ class Order(models.Model):
     customer_phone = models.CharField(max_length=20)
     delivery_address = models.TextField(blank=True)
     fulfillment_type = models.CharField(max_length=20, choices=FULFILLMENT_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='awaiting_payment')
     total = models.DecimalField(max_digits=12, decimal_places=2)
     notes = models.TextField(blank=True)
+    paynow_poll_url = models.URLField(blank=True, max_length=500)
+    paynow_reference = models.CharField(max_length=200, blank=True)
+    payment_confirmed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -155,7 +159,7 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         if not self.order_number:
             import random
-            self.order_number = f"MBI-{random.randint(100000, 999999)}"
+            self.order_number = f"LW-{random.randint(100000, 999999)}"
         super().save(*args, **kwargs)
 
 

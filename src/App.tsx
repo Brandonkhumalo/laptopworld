@@ -15,6 +15,7 @@ import ProductPage from "./pages/ProductPage";
 import DealsPage from "./pages/DealsPage";
 import ShopPage from "./pages/ShopPage";
 import WishlistPage from "./pages/WishlistPage";
+import PaymentStatusPage from "./pages/PaymentStatusPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/category/:id" element={<CategoryPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/payment-status/:orderNumber" element={<PaymentStatusPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

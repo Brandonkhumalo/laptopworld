@@ -300,15 +300,104 @@ def checkout(request):
         delivery_address=delivery_address,
         total=total,
         notes=notes,
+        status='awaiting_payment',
     )
 
     for item_data in order_items_data:
         OrderItem.objects.create(order=order, **item_data)
 
-    cart.items.all().delete()
+    from .services import initiate_paynow_payment
+
+    host = request.build_absolute_uri('/')[:-1]
+    return_url = f"{host}/api/payment/return/?order={order.order_number}"
+    result_url = f"{host}/api/payment/result/"
+
+    payment_result = initiate_paynow_payment(order, return_url, result_url)
+
+    if payment_result['success']:
+        cart.items.all().delete()
+        return Response({
+            'order_number': order.order_number,
+            'redirect_url': payment_result['redirect_url'],
+            'total': str(order.total),
+        }, status=201)
+    else:
+        order.delete()
+        return Response({'error': payment_result.get('error', 'Payment initiation failed')}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def payment_return(request):
+    order_number = request.query_params.get('order')
+    if not order_number:
+        return Response({'error': 'Missing order number'}, status=400)
+
+    try:
+        order = Order.objects.get(order_number=order_number)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
+
+    from .services import check_paynow_payment, process_successful_payment
+
+    result = check_paynow_payment(order)
+    if result['paid']:
+        process_successful_payment(order)
+
+    from django.http import HttpResponseRedirect
+    redirect_path = f"/payment-status/{order.order_number}"
+    return HttpResponseRedirect(redirect_path)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def payment_result(request):
+    reference = request.data.get('reference') or request.query_params.get('reference')
+    if not reference:
+        return Response({'ok': True})
+
+    order = None
+    try:
+        order = Order.objects.get(order_number=reference)
+    except Order.DoesNotExist:
+        try:
+            order = Order.objects.get(paynow_reference=reference)
+        except Order.DoesNotExist:
+            pass
+
+    if not order:
+        return Response({'ok': True})
+
+    from .services import check_paynow_payment, process_successful_payment
+
+    result = check_paynow_payment(order)
+    if result['paid']:
+        process_successful_payment(order)
+
+    return Response({'ok': True})
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def payment_status(request, order_number):
+    try:
+        order = Order.objects.get(order_number=order_number)
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
+
+    from .services import check_paynow_payment, process_successful_payment
+
+    if not order.payment_confirmed and order.paynow_poll_url:
+        result = check_paynow_payment(order)
+        if result['paid']:
+            process_successful_payment(order)
+            order.refresh_from_db()
 
     serializer = OrderSerializer(order)
-    return Response(serializer.data, status=201)
+    return Response({
+        **serializer.data,
+        'payment_confirmed': order.payment_confirmed,
+    })
 
 
 class OrderViewSet(viewsets.ModelViewSet):
