@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 
@@ -20,12 +20,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-10 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="font-display text-xl font-bold mb-3">MBULUUNDI</h3>
+            <h3 className="font-display text-xl font-bold mb-3">LAPTOP WORLD</h3>
             <p className="text-sm text-primary-foreground/60 mb-4 max-w-xs">
-              Zimbabwe's premier tech store. Genuine products, unbeatable prices, and exceptional service since 2020.
-            </p>
-            <p className="text-xs text-primary-foreground/40">
-              Mbuluundi Investments (Pvt) Ltd — Registered in Zimbabwe
+              Zimbabwe's premier tech store. Genuine laptops, phones, accessories and all gadgets at unbeatable prices.
             </p>
           </div>
 
@@ -58,22 +55,22 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/60">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-accent" />
-                <span>Ruvimbo Mall, Shop 13 & 14, 4 David Morgan Crescent, Avondale, Harare</span>
+                <span>First Street & George Silundika, Harare (inside Econet Wireless shop)</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0 text-accent" />
-                <a href="tel:+2638677210547" className="hover:text-accent transition-colors">+263 8677210547</a>
+                <a href="tel:+263782482482" className="hover:text-accent transition-colors">0782 482 482</a>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0 text-accent" />
-                <a href="mailto:mbuluundi@gmail.com" className="hover:text-accent transition-colors break-all">mbuluundi@gmail.com</a>
+                <Phone className="h-4 w-4 shrink-0 text-accent" />
+                <a href="tel:+263771796666" className="hover:text-accent transition-colors">0771 796 666</a>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-primary-foreground/40">
-          <p>© {new Date().getFullYear()} Mbuluundi Investments (Pvt) Ltd. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Laptop World. All rights reserved.</p>
           <p>Designed & Developed by{" "}
             <a href="https://tishanyq.co.zw" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline transition-colors">
               Tishanyq Digital

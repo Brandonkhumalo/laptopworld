@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { getSpecSections } from "@/lib/specTemplates";
 import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon } from "lucide-react";
-import logoImg from "@assets/mbuluundi_1771842825329.jpeg";
+import logoImg from "@assets/laptop_world-removebg-preview_1772088385331.png";
 
 const API_BASE = '';
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Lock, User } from "lucide-react";
-import logoImg from "@assets/mbuluundi_1771842825329.jpeg";
+import logoImg from "@assets/laptop_world-removebg-preview_1772088385331.png";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -29,7 +29,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logoImg} alt="Mbuluundi Investments" className="h-16 mx-auto mb-4 rounded" data-testid="img-admin-logo" />
+          <img src={logoImg} alt="Laptop World" className="h-16 mx-auto mb-4" data-testid="img-admin-logo" />
           <h1 className="font-display text-2xl font-bold text-foreground" data-testid="text-admin-title">Admin Login</h1>
           <p className="text-muted-foreground text-sm mt-1">Sign in to manage your store</p>
         </div>

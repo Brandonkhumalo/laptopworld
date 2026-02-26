@@ -1,7 +1,7 @@
-# Mbuluundi Investments
+# Laptop World
 
 ## Overview
-Full-stack e-commerce platform for Mbuluundi Investments, Zimbabwe's premier tech store. Built with independent React frontend and Django backend, designed to be independently hostable.
+Full-stack e-commerce platform for Laptop World, Zimbabwe's premier tech store. Built with independent React frontend and Django backend, designed to be independently hostable.
 
 ## Tech Stack
 
@@ -89,9 +89,16 @@ Full-stack e-commerce platform for Mbuluundi Investments, Zimbabwe's premier tec
 - Dynamic footer (categories fetched from API)
 - Sections (Top Picks, Categories, Deals Banner) hide when no admin data exists
 
+## Branding
+- **Store Name**: Laptop World
+- **Logo**: attached_assets/laptop_world-removebg-preview_1772088385331.png
+- **Contact**: 0782 482 482 | 0771 796 666
+- **Location**: First Street & George Silundika, Harare (inside Econet Wireless shop)
+- **WhatsApp**: +263 782 482 482
+
 ## Admin Credentials
-- Username: Mbuluundi
-- Password: admin@Mbuluundi
+- Username: laptopworld
+- Password: laptopworld@admin
 - Login at: /admin
 
 ## Environment

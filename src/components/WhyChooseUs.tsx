@@ -29,7 +29,7 @@ const WhyChooseUs = () => (
           Why Clients <span className="text-gradient">Love Us</span>
         </h2>
         <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-          Mbuluundi Investments is Zimbabwe's trusted technology partner since 2020.
+          Laptop World is Zimbabwe's trusted technology partner for laptops, phones, accessories and all gadgets.
         </p>
       </motion.div>
 

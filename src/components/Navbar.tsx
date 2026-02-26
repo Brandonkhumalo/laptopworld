@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingCart, Heart, Menu, X, Phone, ChevronRight, Percent, MapPin, Mail, Clock } from "lucide-react";
+import { Search, ShoppingCart, Heart, Menu, X, Phone, ChevronRight, Percent, MapPin, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { api } from "@/lib/api";
 import { Smartphone, Laptop, Watch, Headphones, Gamepad2, Cable, Package, Camera, Tv, Speaker, Tablet, Monitor } from "lucide-react";
-import logoImg from "@assets/mbuluundi_1771842825329.jpeg";
+import logoImg from "@assets/laptop_world-removebg-preview_1772088385331.png";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Smartphone, Laptop, Watch, Headphones, Gamepad2, Cable, Package, Camera, Tv, Speaker, Tablet, Monitor,
@@ -75,7 +75,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="link-home">
-          <img src={logoImg} alt="Mbuluundi Investments" className="h-10 w-auto rounded" data-testid="img-logo" />
+          <img src={logoImg} alt="Laptop World" className="h-10 w-auto" data-testid="img-logo" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6" data-testid="nav-desktop">
@@ -269,17 +269,17 @@ const Navbar = () => {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <div className="p-4 space-y-3">
-                    <a href="tel:+2638677210547" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
+                    <a href="tel:+263782482482" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
                       <Phone className="h-4 w-4 text-accent" />
-                      +263 8677210547
+                      0782 482 482
                     </a>
-                    <a href="mailto:info@mbuluundi.co.zw" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
-                      <Mail className="h-4 w-4 text-accent" />
-                      info@mbuluundi.co.zw
+                    <a href="tel:+263771796666" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
+                      <Phone className="h-4 w-4 text-accent" />
+                      0771 796 666
                     </a>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 text-accent shrink-0" />
-                      Harare, Zimbabwe
+                      First St & George Silundika, Harare (inside Econet shop)
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4 text-accent shrink-0" />
@@ -312,9 +312,9 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <a href="tel:+2638677210547" className="hidden lg:flex items-center gap-1 text-xs text-primary-foreground/80 hover:text-accent transition-colors" data-testid="link-phone">
+          <a href="tel:+263782482482" className="hidden lg:flex items-center gap-1 text-xs text-primary-foreground/80 hover:text-accent transition-colors" data-testid="link-phone">
             <Phone className="h-3.5 w-3.5" />
-            <span>+263 8677210547</span>
+            <span>0782 482 482</span>
           </a>
           <Link to="/wishlist" className="relative p-2 text-primary-foreground/80 hover:text-accent transition-colors" aria-label="Wishlist" data-testid="link-wishlist">
             <Heart className="h-5 w-5" />

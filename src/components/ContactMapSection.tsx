@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Clock, MessageCircle } from "lucide-react";
 
 const ContactMapSection = () => (
   <section id="contact" className="py-16 bg-background">
@@ -26,8 +26,8 @@ const ContactMapSection = () => (
           className="lg:col-span-3 rounded-2xl overflow-hidden shadow-product border border-border min-h-[300px] md:min-h-[400px]"
         >
           <iframe
-            title="Mbuluundi Investments Location"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.5!2d31.0432!3d-17.7935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a4f09ea0b7a1%3A0x5a5d5d5d5d5d5d5d!2sRuvimbo%20Mall%2C%204%20David%20Morgan%20Crescent%2C%20Avondale%2C%20Harare%2C%20Zimbabwe!5e0!3m2!1sen!2szw!4v1700000000000!5m2!1sen!2szw"
+            title="Laptop World Location"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3798.5!2d31.0489!3d-17.8292!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a4e59c4fdb4d%3A0x5f9a8e5f5f5f5f5f!2sFirst%20Street%20%26%20George%20Silundika%2C%20Harare%2C%20Zimbabwe!5e0!3m2!1sen!2szw!4v1700000000000!5m2!1sen!2szw"
             width="100%"
             height="100%"
             style={{ border: 0, minHeight: "400px" }}
@@ -51,7 +51,7 @@ const ContactMapSection = () => (
             <div>
               <h3 className="font-display font-semibold text-foreground text-sm">Our Store</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Ruvimbo Mall, Shop 13 & 14, 4 David Morgan Crescent, Avondale, Harare
+                First Street & George Silundika, Harare (inside Econet Wireless shop)
               </p>
             </div>
           </div>
@@ -62,20 +62,11 @@ const ContactMapSection = () => (
             </div>
             <div>
               <h3 className="font-display font-semibold text-foreground text-sm">Call Us</h3>
-              <a href="tel:+2638677210547" className="text-sm text-muted-foreground mt-1 block hover:text-accent transition-colors" data-testid="link-call-us">
-                +263 8677210547
+              <a href="tel:+263782482482" className="text-sm text-muted-foreground mt-1 block hover:text-accent transition-colors" data-testid="link-call-us">
+                0782 482 482
               </a>
-            </div>
-          </div>
-
-          <div className="rounded-xl bg-card border border-border p-5 shadow-product flex items-start gap-4">
-            <div className="rounded-lg bg-accent/10 p-3 shrink-0">
-              <Mail className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <h3 className="font-display font-semibold text-foreground text-sm">Email</h3>
-              <a href="mailto:mbuluundi@gmail.com" className="text-sm text-muted-foreground mt-1 block hover:text-accent transition-colors" data-testid="link-email">
-                mbuluundi@gmail.com
+              <a href="tel:+263771796666" className="text-sm text-muted-foreground block hover:text-accent transition-colors">
+                0771 796 666
               </a>
             </div>
           </div>
@@ -87,7 +78,7 @@ const ContactMapSection = () => (
             <div>
               <h3 className="font-display font-semibold text-foreground text-sm">WhatsApp</h3>
               <a
-                href="https://wa.me/2638677210547"
+                href="https://wa.me/263782482482"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-muted-foreground mt-1 block hover:text-accent transition-colors"
