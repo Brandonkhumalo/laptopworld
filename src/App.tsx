@@ -16,6 +16,8 @@ import DealsPage from "./pages/DealsPage";
 import ShopPage from "./pages/ShopPage";
 import WishlistPage from "./pages/WishlistPage";
 import PaymentStatusPage from "./pages/PaymentStatusPage";
+// Amenities page — registered agent services for banks & Econet
+import Amenities from "./pages/Amenities";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
               <Route path="/category/:id" element={<CategoryPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/payment-status/:orderNumber" element={<PaymentStatusPage />} />
+              {/* Registered agent services page */}
+              <Route path="/amenities" element={<Amenities />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

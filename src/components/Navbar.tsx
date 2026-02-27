@@ -245,6 +245,14 @@ const Navbar = () => {
             </AnimatePresence>
           </div>
 
+          <Link
+            to="/amenities"
+            className="text-sm font-medium py-2 transition-colors duration-200 text-primary-foreground/80 hover:text-accent"
+            data-testid="link-amenities"
+          >
+            Other Services
+          </Link>
+
           <div
             className="relative"
             onMouseEnter={() => handleDropdownEnter('Contact')}
@@ -390,6 +398,14 @@ const Navbar = () => {
                 data-testid="link-mobile-categories"
               >
                 Categories
+              </Link>
+              <Link
+                to="/amenities"
+                onClick={() => setMobileOpen(false)}
+                className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
+                data-testid="link-mobile-amenities"
+              >
+                Amenities
               </Link>
               <a
                 href="/#contact"
