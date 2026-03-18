@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Smartphone, Laptop, Watch, Headphones, Gamepad2, Cable, Package, Camera, Tv, Speaker, Tablet, Monitor } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -71,7 +73,7 @@ const Categories = () => {
                 whileHover={{ y: -6, scale: 1.03 }}
               >
                 <Link
-                  to={`/category/${cat.id}`}
+                  href={`/category/${cat.id}`}
                   className="group flex flex-col items-center gap-3 rounded-xl bg-card p-6 shadow-product transition-shadow hover:shadow-hover cursor-pointer"
                   data-testid={`link-category-${cat.id}`}
                 >

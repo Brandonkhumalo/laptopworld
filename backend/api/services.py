@@ -1,5 +1,6 @@
 import os
 import logging
+from html import escape
 from paynow import Paynow
 import resend
 
@@ -87,7 +88,7 @@ def send_order_emails(order):
     for item in order.items.all():
         items_html += f"""
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">{item.product_name}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">{escape(item.product_name)}</td>
             <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">{item.quantity}</td>
             <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price:.2f}</td>
             <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity):.2f}</td>
@@ -101,13 +102,13 @@ def send_order_emails(order):
         </div>
         <div style="padding: 20px; background: #ffffff;">
             <h2 style="color: #0a1628;">Order Confirmation</h2>
-            <p><strong>Order Number:</strong> {order.order_number}</p>
-            <p><strong>Customer:</strong> {order.customer_name}</p>
-            <p><strong>Email:</strong> {order.customer_email}</p>
-            <p><strong>Phone:</strong> {order.customer_phone}</p>
+            <p><strong>Order Number:</strong> {escape(order.order_number)}</p>
+            <p><strong>Customer:</strong> {escape(order.customer_name)}</p>
+            <p><strong>Email:</strong> {escape(order.customer_email)}</p>
+            <p><strong>Phone:</strong> {escape(order.customer_phone)}</p>
             <p><strong>Fulfillment:</strong> {order.get_fulfillment_type_display()}</p>
-            {"<p><strong>Delivery Address:</strong> " + order.delivery_address + "</p>" if order.delivery_address else ""}
-            {"<p><strong>Notes:</strong> " + order.notes + "</p>" if order.notes else ""}
+            {"<p><strong>Delivery Address:</strong> " + escape(order.delivery_address) + "</p>" if order.delivery_address else ""}
+            {"<p><strong>Notes:</strong> " + escape(order.notes) + "</p>" if order.notes else ""}
 
             <h3 style="color: #0a1628; margin-top: 20px;">Order Items</h3>
             <table style="width: 100%; border-collapse: collapse;">
@@ -152,7 +153,7 @@ def send_order_emails(order):
             "to": [order.customer_email],
             "subject": f"Order Confirmed - #{order.order_number}",
             "html": f"""
-            <p>Hi {order.customer_name},</p>
+            <p>Hi {escape(order.customer_name)},</p>
             <p>Thank you for your purchase! Your payment has been confirmed.</p>
             {order_details_html}
             <p style="margin-top: 20px;">We will notify you when your order is ready for {'delivery' if order.fulfillment_type == 'delivery' else 'collection'}.</p>

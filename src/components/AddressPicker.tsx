@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Search, Check, Loader2 } from "lucide-react";
 

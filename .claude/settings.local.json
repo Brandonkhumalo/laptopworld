@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(npx vite:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(mkdir -p public/images)",
+      "Bash(mkdir -p app/shop)",
+      "Bash(mkdir -p app/deals)",
+      "Bash(mkdir -p app/cart)",
+      "Bash(mkdir -p app/wishlist)",
+      "Bash(node -e \"const p = require\\(''./node_modules/next/package.json''\\); console.log\\(''Next version:'', p.version\\); console.log\\(''React peer dep:'', p.peerDependencies?.react\\)\")",
+      "Bash(npx next:*)",
+      "Bash(find app:*)",
+      "Bash(mkdir -p public/media/products)",
+      "Bash(cp backend/media/products/* public/media/products/)",
+      "Bash(pip install:*)",
+      "Bash(python manage.py makemigrations)",
+      "Bash(pip freeze:*)"
+    ]
+  }
+}

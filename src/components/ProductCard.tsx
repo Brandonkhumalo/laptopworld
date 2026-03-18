@@ -1,8 +1,10 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface ProductCardProps {
   id: number;
@@ -80,7 +82,7 @@ const ProductCard = ({ id, image, name, category, price, originalPrice, dealPric
         <Heart className={`h-4 w-4 ${wishlisted ? 'fill-current' : ''}`} />
       </button>
 
-      <Link to={`/product/${id}`}>
+      <Link href={`/product/${id}`}>
         <div className="relative aspect-square overflow-hidden bg-muted p-6">
           {imageUrl ? (
             <img

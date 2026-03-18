@@ -1,8 +1,2 @@
-from django.middleware.csrf import CsrfViewMiddleware
-
-
-class DisableCSRFForAPI(CsrfViewMiddleware):
-    def process_view(self, request, callback, callback_args, callback_kwargs):
-        if request.path.startswith('/api/'):
-            return None
-        return super().process_view(request, callback, callback_args, callback_kwargs)
+# CSRF middleware disabled — using Django's built-in CsrfViewMiddleware instead.
+# This file is kept for reference.

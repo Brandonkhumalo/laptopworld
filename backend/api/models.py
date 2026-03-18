@@ -161,8 +161,7 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            import random
-            self.order_number = f"LW-{random.randint(100000, 999999)}"
+            self.order_number = f"LW-{uuid.uuid4().hex[:12].upper()}"
         super().save(*args, **kwargs)
 
 

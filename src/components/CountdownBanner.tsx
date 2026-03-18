@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface Deal {
   id: number;
@@ -93,7 +95,7 @@ const CountdownBanner = () => {
             )}
           </div>
           <Link
-            to="/deals"
+            href="/deals"
             className="rounded-full gradient-accent px-8 py-3.5 font-semibold text-secondary-foreground hover:opacity-90 transition-opacity"
             data-testid="link-shop-deals"
           >

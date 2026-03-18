@@ -1,16 +1,19 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
-import heroBanner from "@/assets/hero-banner.jpg";
-import airpods from "@assets/airpods_1771846836429.jpeg";
-import iwatch from "@assets/iwatch_1771846836429.jpeg";
-import galaxyZfold from "@assets/galaxy_zfold_1771846836430.jpeg";
-import macbook from "@assets/macbook_1771846836431.jpeg";
-import galaxyZflip from "@assets/galaxy_zflip_1771846836434.jpeg";
-import iphone from "@assets/iphone_1771846836435.jpeg";
-import iphone2 from "@assets/iphone2_1771846836434.jpeg";
-import hpLaptop from "@assets/hp_laptop_1771846836433.jpeg";
+import Link from "next/link";
+
+const heroBanner = "/images/hero-banner.jpg";
+const airpods = "/images/hero-banner.jpg";
+const iwatch = "/images/hero-banner.jpg";
+const galaxyZfold = "/images/hero-banner.jpg";
+const macbook = "/images/hero-banner.jpg";
+const galaxyZflip = "/images/hero-banner.jpg";
+const iphone = "/images/hero-banner.jpg";
+const iphone2 = "/images/hero-banner.jpg";
+const hpLaptop = "/images/hero-banner.jpg";
 
 const slides = [
   {
@@ -148,7 +151,7 @@ const HeroSection = () => {
           </AnimatePresence>
           <div className="flex flex-wrap gap-4">
             <Link
-              to="/shop"
+              href="/shop"
               className="inline-flex items-center gap-2 rounded-full gradient-accent px-8 py-3.5 font-semibold text-secondary-foreground hover:opacity-90 transition-opacity animate-pulse-glow"
               data-testid="link-shop-now"
             >

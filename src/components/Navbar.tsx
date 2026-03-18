@@ -1,12 +1,16 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ShoppingCart, Heart, Menu, X, Phone, ChevronRight, Percent, MapPin, Clock } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { api } from "@/lib/api";
 import { Smartphone, Laptop, Watch, Headphones, Gamepad2, Cable, Package, Camera, Tv, Speaker, Tablet, Monitor } from "lucide-react";
-import logoImg from "@assets/laptop_world-removebg-preview_1772088385331.png";
+
+const logoImg = "/logo.png";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Smartphone, Laptop, Watch, Headphones, Gamepad2, Cable, Package, Camera, Tv, Speaker, Tablet, Monitor,
@@ -37,7 +41,7 @@ const Navbar = () => {
   const [mobileSearchQuery, setMobileSearchQuery] = useState('');
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const navigate = useNavigate();
+  const router = useRouter();
   const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -48,7 +52,7 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
   };
@@ -56,7 +60,7 @@ const Navbar = () => {
   const handleMobileSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (mobileSearchQuery.trim()) {
-      navigate(`/shop?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
+      router.push(`/shop?q=${encodeURIComponent(mobileSearchQuery.trim())}`);
       setMobileSearchQuery('');
       setMobileOpen(false);
     }
@@ -74,7 +78,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="link-home">
+        <Link href="/" className="flex items-center gap-2 shrink-0" data-testid="link-home">
           <img src={logoImg} alt="Laptop World" className="h-10 w-auto" data-testid="img-logo" />
         </Link>
 
@@ -85,7 +89,7 @@ const Navbar = () => {
             onMouseLeave={handleDropdownLeave}
           >
             <Link
-              to="/shop"
+              href="/shop"
               className={`text-sm font-medium py-2 transition-colors duration-200 ${activeDropdown === 'Shop' ? 'text-accent' : 'text-primary-foreground/80 hover:text-accent'}`}
               data-testid="link-shop"
             >
@@ -102,21 +106,21 @@ const Navbar = () => {
                   onMouseEnter={() => handleDropdownEnter('Shop')}
                   onMouseLeave={handleDropdownLeave}
                 >
-                  <Link to="/shop" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors" onClick={() => setActiveDropdown(null)} data-testid="dropdown-all-products">
+                  <Link href="/shop" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors" onClick={() => setActiveDropdown(null)} data-testid="dropdown-all-products">
                     <Package className="h-4 w-4 text-accent" />
                     <div>
                       <p className="text-sm font-medium text-foreground">All Products</p>
                       <p className="text-xs text-muted-foreground">Browse everything</p>
                     </div>
                   </Link>
-                  <Link to="/deals" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)} data-testid="dropdown-deals">
+                  <Link href="/deals" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)} data-testid="dropdown-deals">
                     <Percent className="h-4 w-4 text-success" />
                     <div>
                       <p className="text-sm font-medium text-foreground">Hot Deals</p>
                       <p className="text-xs text-muted-foreground">{deals.length > 0 ? `${deals.length} active deal${deals.length > 1 ? 's' : ''}` : 'Check for savings'}</p>
                     </div>
                   </Link>
-                  <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)} data-testid="dropdown-wishlist">
+                  <Link href="/wishlist" className="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)} data-testid="dropdown-wishlist">
                     <Heart className="h-4 w-4 text-destructive" />
                     <div>
                       <p className="text-sm font-medium text-foreground">My Wishlist</p>
@@ -134,7 +138,7 @@ const Navbar = () => {
             onMouseLeave={handleDropdownLeave}
           >
             <Link
-              to="/deals"
+              href="/deals"
               className={`text-sm font-medium py-2 transition-colors duration-200 ${activeDropdown === 'Deals' ? 'text-accent' : 'text-primary-foreground/80 hover:text-accent'}`}
               data-testid="link-deals"
             >
@@ -156,7 +160,7 @@ const Navbar = () => {
                       {deals.slice(0, 4).map((deal) => (
                         <Link
                           key={deal.id}
-                          to={`/product/${deal.product}`}
+                          href={`/product/${deal.product}`}
                           className="flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors border-b border-border/50 last:border-0"
                           onClick={() => setActiveDropdown(null)}
                           data-testid={`dropdown-deal-${deal.id}`}
@@ -170,7 +174,7 @@ const Navbar = () => {
                           </span>
                         </Link>
                       ))}
-                      <Link to="/deals" className="flex items-center justify-center gap-1 px-4 py-2.5 text-xs font-medium text-accent hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)}>
+                      <Link href="/deals" className="flex items-center justify-center gap-1 px-4 py-2.5 text-xs font-medium text-accent hover:bg-muted transition-colors border-t border-border/50" onClick={() => setActiveDropdown(null)}>
                         View All Deals <ChevronRight className="h-3 w-3" />
                       </Link>
                     </>
@@ -191,7 +195,7 @@ const Navbar = () => {
             onMouseLeave={handleDropdownLeave}
           >
             <Link
-              to="/shop"
+              href="/shop"
               className={`text-sm font-medium py-2 transition-colors duration-200 ${activeDropdown === 'Categories' ? 'text-accent' : 'text-primary-foreground/80 hover:text-accent'}`}
               data-testid="link-categories"
             >
@@ -217,7 +221,7 @@ const Navbar = () => {
                           return (
                             <Link
                               key={cat.id}
-                              to={`/category/${cat.id}`}
+                              href={`/category/${cat.id}`}
                               className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
                               onClick={() => setActiveDropdown(null)}
                               data-testid={`dropdown-category-${cat.id}`}
@@ -246,7 +250,7 @@ const Navbar = () => {
           </div>
 
           <Link
-            to="/amenities"
+            href="/amenities"
             className="text-sm font-medium py-2 transition-colors duration-200 text-primary-foreground/80 hover:text-accent"
             data-testid="link-amenities"
           >
@@ -324,7 +328,7 @@ const Navbar = () => {
             <Phone className="h-3.5 w-3.5" />
             <span>0782 482 482</span>
           </a>
-          <Link to="/wishlist" className="relative p-2 text-primary-foreground/80 hover:text-accent transition-colors" aria-label="Wishlist" data-testid="link-wishlist">
+          <Link href="/wishlist" className="relative p-2 text-primary-foreground/80 hover:text-accent transition-colors" aria-label="Wishlist" data-testid="link-wishlist">
             <Heart className="h-5 w-5" />
             {wishlistCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground" data-testid="text-wishlist-count">
@@ -332,7 +336,7 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-          <Link to="/cart" className="relative p-2 text-primary-foreground/80 hover:text-accent transition-colors" aria-label="Cart" data-testid="link-cart">
+          <Link href="/cart" className="relative p-2 text-primary-foreground/80 hover:text-accent transition-colors" aria-label="Cart" data-testid="link-cart">
             <ShoppingCart className="h-5 w-5" />
             {cartCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground" data-testid="text-cart-count">
@@ -376,7 +380,7 @@ const Navbar = () => {
               </form>
 
               <Link
-                to="/shop"
+                href="/shop"
                 onClick={() => setMobileOpen(false)}
                 className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
                 data-testid="link-mobile-shop"
@@ -384,7 +388,7 @@ const Navbar = () => {
                 Shop
               </Link>
               <Link
-                to="/deals"
+                href="/deals"
                 onClick={() => setMobileOpen(false)}
                 className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
                 data-testid="link-mobile-deals"
@@ -392,7 +396,7 @@ const Navbar = () => {
                 Deals
               </Link>
               <Link
-                to="/shop"
+                href="/shop"
                 onClick={() => setMobileOpen(false)}
                 className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
                 data-testid="link-mobile-categories"
@@ -400,7 +404,7 @@ const Navbar = () => {
                 Categories
               </Link>
               <Link
-                to="/amenities"
+                href="/amenities"
                 onClick={() => setMobileOpen(false)}
                 className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
                 data-testid="link-mobile-amenities"
@@ -416,7 +420,7 @@ const Navbar = () => {
                 Contact
               </a>
               <Link
-                to="/wishlist"
+                href="/wishlist"
                 onClick={() => setMobileOpen(false)}
                 className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors flex items-center gap-2"
                 data-testid="link-mobile-wishlist"

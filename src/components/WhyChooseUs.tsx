@@ -1,11 +1,14 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { Zap, Globe, Heart, Users, Sparkles, Clock } from "lucide-react";
-import airpods from "@assets/airpods_1771846836429.jpeg";
-import smartwatch from "@assets/smartwatch_1771846836433.jpeg";
-import galaxyXr from "@assets/galaxy_xr_1771846836430.jpeg";
-import macbook from "@assets/macbook_1771846836431.jpeg";
-import applevision from "@assets/applevision_pro_1771846836432.jpeg";
-import hpLaptop from "@assets/hp_laptop_1771846836433.jpeg";
+
+const airpods = "/images/hero-banner.jpg";
+const smartwatch = "/images/product-watch.jpg";
+const galaxyXr = "/images/product-phone.jpg";
+const macbook = "/images/product-laptop.jpg";
+const applevision = "/images/hero-banner.jpg";
+const hpLaptop = "/images/product-laptop.jpg";
 
 const values = [
   { icon: Zap, title: "Competitive", desc: "Best prices in Zimbabwe for genuine tech products", bg: macbook },

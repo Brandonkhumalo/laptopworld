@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { Phone, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { api } from "@/lib/api";
 
 interface CategoryData {
@@ -29,11 +31,11 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-semibold mb-3 text-sm uppercase tracking-wider">Quick Links</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/60">
-              <li><Link to="/" className="hover:text-accent transition-colors">Home</Link></li>
-              <li><Link to="/shop" className="hover:text-accent transition-colors">Shop</Link></li>
-              <li><Link to="/deals" className="hover:text-accent transition-colors">Deals</Link></li>
-              <li><Link to="/wishlist" className="hover:text-accent transition-colors">Wishlist</Link></li>
-              <li><Link to="/cart" className="hover:text-accent transition-colors">Cart</Link></li>
+              <li><Link href="/" className="hover:text-accent transition-colors">Home</Link></li>
+              <li><Link href="/shop" className="hover:text-accent transition-colors">Shop</Link></li>
+              <li><Link href="/deals" className="hover:text-accent transition-colors">Deals</Link></li>
+              <li><Link href="/wishlist" className="hover:text-accent transition-colors">Wishlist</Link></li>
+              <li><Link href="/cart" className="hover:text-accent transition-colors">Cart</Link></li>
             </ul>
           </div>
 
@@ -43,7 +45,7 @@ const Footer = () => {
               <ul className="space-y-2 text-sm text-primary-foreground/60">
                 {categories.map((cat) => (
                   <li key={cat.id}>
-                    <Link to={`/category/${cat.id}`} className="hover:text-accent transition-colors">{cat.name}</Link>
+                    <Link href={`/category/${cat.id}`} className="hover:text-accent transition-colors">{cat.name}</Link>
                   </li>
                 ))}
               </ul>

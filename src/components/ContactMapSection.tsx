@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, MessageCircle } from "lucide-react";
 

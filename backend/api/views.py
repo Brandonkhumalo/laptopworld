@@ -1,14 +1,17 @@
+import os
+import uuid
+import json
+import re
+import logging
+
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
-import uuid
-import hashlib
-import time
-import json
+from django_ratelimit.decorators import ratelimit
 
 from .models import Category, Product, ProductImage, Deal, TopPick, Cart, CartItem, Order, OrderItem, DeliverySettings
 from .serializers import (
@@ -17,18 +20,23 @@ from .serializers import (
     OrderSerializer, ProductImageSerializer, DeliverySettingsSerializer
 )
 
-admin_tokens = {}
+logger = logging.getLogger(__name__)
 
 
 class IsAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        token = request.headers.get('Authorization', '').replace('Bearer ', '')
-        if token and token in admin_tokens:
-            return True
+        auth = request.headers.get('Authorization', '')
+        if auth.startswith('Bearer '):
+            token_key = auth[7:]
+            try:
+                token = Token.objects.get(key=token_key)
+                return token.user.is_staff
+            except Token.DoesNotExist:
+                return False
         return request.user and request.user.is_staff
 
 
-@csrf_exempt
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def admin_login(request):
@@ -36,26 +44,38 @@ def admin_login(request):
     password = request.data.get('password')
     user = authenticate(request, username=username, password=password)
     if user is not None and user.is_staff:
-        token = hashlib.sha256(f"{username}{time.time()}".encode()).hexdigest()
-        admin_tokens[token] = user.username
-        return Response({'message': 'Login successful', 'username': user.username, 'token': token})
+        token, _ = Token.objects.get_or_create(user=user)
+        logger.info(f"Admin login successful: {user.username} from {request.META.get('REMOTE_ADDR')}")
+        return Response({'message': 'Login successful', 'username': user.username, 'token': token.key})
+    logger.warning(f"Admin login failed for username '{username}' from {request.META.get('REMOTE_ADDR')}")
     return Response({'error': 'Invalid credentials or not an admin'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def admin_logout(request):
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    admin_tokens.pop(token, None)
+    auth = request.headers.get('Authorization', '')
+    if auth.startswith('Bearer '):
+        try:
+            token = Token.objects.get(key=auth[7:])
+            logger.info(f"Admin logout: {token.user.username} from {request.META.get('REMOTE_ADDR')}")
+            token.delete()
+        except Token.DoesNotExist:
+            pass
     return Response({'message': 'Logged out successfully'})
 
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def admin_check(request):
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    if token and token in admin_tokens:
-        return Response({'authenticated': True, 'username': admin_tokens[token]})
+    auth = request.headers.get('Authorization', '')
+    if auth.startswith('Bearer '):
+        try:
+            token = Token.objects.get(key=auth[7:])
+            if token.user.is_staff:
+                return Response({'authenticated': True, 'username': token.user.username})
+        except Token.DoesNotExist:
+            pass
     return Response({'authenticated': False})
 
 
@@ -150,6 +170,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 def delete_product_image(request, image_id):
     try:
         img = ProductImage.objects.get(id=image_id)
+        logger.info(f"Product image deleted: id={image_id} from {request.META.get('REMOTE_ADDR')}")
         img.delete()
         return Response({'message': 'Image deleted'})
     except ProductImage.DoesNotExist:
@@ -204,7 +225,13 @@ def get_cart(request):
 def add_to_cart(request):
     cart, session_key = get_or_create_cart(request)
     product_id = request.data.get('product_id')
-    quantity = int(request.data.get('quantity', 1))
+
+    try:
+        quantity = int(request.data.get('quantity', 1))
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid quantity'}, status=400)
+    if quantity < 1 or quantity > 99:
+        return Response({'error': 'Quantity must be between 1 and 99'}, status=400)
 
     try:
         product = Product.objects.get(id=product_id)
@@ -232,7 +259,13 @@ def update_cart_item(request, item_id):
     except CartItem.DoesNotExist:
         return Response({'error': 'Cart item not found'}, status=404)
 
-    quantity = int(request.data.get('quantity', 1))
+    try:
+        quantity = int(request.data.get('quantity', 1))
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid quantity'}, status=400)
+    if quantity < 0 or quantity > 99:
+        return Response({'error': 'Quantity must be between 0 and 99'}, status=400)
+
     if quantity <= 0:
         item.delete()
     else:
@@ -260,6 +293,7 @@ def remove_from_cart(request, item_id):
     return Response(data)
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 @api_view(['POST'])
 def checkout(request):
     cart, session_key = get_or_create_cart(request)
@@ -280,6 +314,15 @@ def checkout(request):
 
     if not all([customer_name, customer_email, customer_phone, fulfillment_type]):
         return Response({'error': 'Missing required fields'}, status=400)
+
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', customer_email):
+        return Response({'error': 'Invalid email address'}, status=400)
+    if not re.match(r'^[\d\s\+\-\(\)]{7,20}$', customer_phone):
+        return Response({'error': 'Invalid phone number'}, status=400)
+    if fulfillment_type not in ('delivery', 'collection'):
+        return Response({'error': 'Invalid fulfillment type'}, status=400)
+    if len(customer_name) < 2 or len(customer_name) > 200:
+        return Response({'error': 'Name must be between 2 and 200 characters'}, status=400)
 
     if fulfillment_type == 'delivery' and not delivery_address:
         return Response({'error': 'Delivery address is required'}, status=400)
@@ -325,11 +368,14 @@ def checkout(request):
     for item_data in order_items_data:
         OrderItem.objects.create(order=order, **item_data)
 
+    logger.info(f"New order created: {order.order_number} by {customer_name} from {request.META.get('REMOTE_ADDR')}")
+
     from .services import initiate_paynow_payment
 
-    host = request.build_absolute_uri('/')[:-1]
-    return_url = f"{host}/api/payment/return/?order={order.order_number}"
-    result_url = f"{host}/api/payment/result/"
+    frontend_url = os.environ.get('FRONTEND_URL', request.build_absolute_uri('/')[:-1])
+    backend_url = os.environ.get('BACKEND_URL', request.build_absolute_uri('/')[:-1])
+    return_url = f"{frontend_url}/payment-status/{order.order_number}"
+    result_url = f"{backend_url}/api/payment/result/"
 
     payment_result = initiate_paynow_payment(order, return_url, result_url)
 
@@ -396,6 +442,7 @@ def payment_result(request):
     return Response({'ok': True})
 
 
+@ratelimit(key='ip', rate='30/m', method='GET', block=True)
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def payment_status(request, order_number):
@@ -443,8 +490,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         new_status = request.data.get('status')
         if new_status not in dict(Order.STATUS_CHOICES):
             return Response({'error': 'Invalid status'}, status=400)
+        old_status = order.status
         order.status = new_status
         order.save()
+        logger.info(f"Order {order.order_number} status changed: {old_status} -> {new_status} from {request.META.get('REMOTE_ADDR')}")
         return Response(OrderSerializer(order).data)
 
 
@@ -456,15 +505,13 @@ def get_delivery_settings(request):
 
 
 @api_view(['PUT'])
+@permission_classes([IsAdminUser])
 def update_delivery_settings(request):
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    if token not in admin_tokens:
-        return Response({'error': 'Unauthorized'}, status=401)
-
     settings = DeliverySettings.get_settings()
     serializer = DeliverySettingsSerializer(settings, data=request.data)
     if serializer.is_valid():
         serializer.save()
+        logger.info(f"Delivery settings updated from {request.META.get('REMOTE_ADDR')}")
         return Response(serializer.data)
     return Response(serializer.errors, status=400)
 
