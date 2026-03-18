@@ -13,6 +13,10 @@ dist-ssr
 .next
 out
 *.local
+__pycache__/
+*.pyc
+*.sqlite3
+backend/.env
 
 # Editor directories and files
 .vscode/*
