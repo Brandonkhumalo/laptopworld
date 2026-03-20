@@ -4,7 +4,7 @@
     "builder": "DOCKERFILE",
     "dockerfilePath": "backend/Dockerfile",
     "buildContext": "backend",
-    "watchPatterns": ["backend/**"]
+    "watchPatterns": ["backend/**", "railway.json"]
   },
   "deploy": {
     "startCommand": "python manage.py migrate --noinput && gunicorn config.wsgi:application -c gunicorn.conf.py"
