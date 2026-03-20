@@ -23,7 +23,7 @@ RUN mkdir -p /app/logs /app/media
 # Collect static files
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
 # Run with Gunicorn using config file
 CMD ["gunicorn", "config.wsgi:application", "-c", "gunicorn.conf.py"]

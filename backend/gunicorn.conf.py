@@ -1,7 +1,8 @@
 import multiprocessing
 
-# Bind to 0.0.0.0:8000 inside the container
-bind = "0.0.0.0:8000"
+# Bind to 0.0.0.0 on the PORT set by Railway (defaults to 8000 locally)
+import os
+bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 
 # Workers = (2 * CPU cores) + 1 — good starting point
 workers = multiprocessing.cpu_count() * 2 + 1
