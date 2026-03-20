@@ -1,11 +1,12 @@
-import multiprocessing
+import os
 
 # Bind to 0.0.0.0 on the PORT set by Railway (defaults to 8000 locally)
-import os
 bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 
-# Use 2 workers on Railway to avoid OOM, configurable via env var
-workers = int(os.environ.get('WEB_CONCURRENCY', '2'))
+# Hardcode 2 workers — Railway containers have limited memory (~512MB)
+# Do NOT use WEB_CONCURRENCY or multiprocessing.cpu_count() as Railway
+# exposes all host CPUs, leading to 30-60+ workers and OOM kills
+workers = 2
 
 # Each worker gets 2 threads for handling concurrent I/O (DB queries, PayNow API calls)
 threads = 2
