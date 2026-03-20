@@ -1,5 +1,10 @@
 from django.db import models
+import logging
 import uuid
+
+from .image_utils import compress_image
+
+logger = logging.getLogger(__name__)
 
 
 class Category(models.Model):
@@ -22,6 +27,14 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.image and hasattr(self.image, 'file'):
+            try:
+                self.image = compress_image(self.image)
+            except Exception as e:
+                logger.warning(f"Image compression failed for category '{self.name}': {e}")
+        super().save(*args, **kwargs)
 
 
 class Product(models.Model):
@@ -51,6 +64,14 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.sku})"
 
+    def save(self, *args, **kwargs):
+        if self.image and hasattr(self.image, 'file'):
+            try:
+                self.image = compress_image(self.image)
+            except Exception as e:
+                logger.warning(f"Image compression failed for product '{self.name}': {e}")
+        super().save(*args, **kwargs)
+
     @property
     def deal_price(self):
         deal = self.deals.filter(active=True).first()
@@ -73,6 +94,14 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image {self.order} for {self.product.name}"
+
+    def save(self, *args, **kwargs):
+        if self.image and hasattr(self.image, 'file'):
+            try:
+                self.image = compress_image(self.image)
+            except Exception as e:
+                logger.warning(f"Image compression failed for ProductImage {self.order}: {e}")
+        super().save(*args, **kwargs)
 
 
 class Deal(models.Model):

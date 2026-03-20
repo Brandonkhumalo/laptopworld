@@ -23,7 +23,8 @@
       "Bash(cp backend/media/products/* public/media/products/)",
       "Bash(pip install:*)",
       "Bash(python manage.py makemigrations)",
-      "Bash(pip freeze:*)"
+      "Bash(pip freeze:*)",
+      "Bash(python -c \":*)"
     ]
   }
 }
