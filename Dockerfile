@@ -1,18 +1,29 @@
-FROM node:20-alpine
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+# Install system dependencies for psycopg2
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy application code
-COPY . .
+# Install Python dependencies
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Build the Next.js app
-RUN npm run build
+# Copy only backend files
+COPY backend/ .
 
-EXPOSE 5000
+# Create required directories
+RUN mkdir -p /app/logs /app/media
 
-# Start Next.js production server
-CMD ["npm", "run", "start"]
+# Collect static files
+RUN python manage.py collectstatic --noinput 2>/dev/null || true
+
+EXPOSE 8000
+
+# Run with Gunicorn using config file
+CMD ["gunicorn", "config.wsgi:application", "-c", "gunicorn.conf.py"]
