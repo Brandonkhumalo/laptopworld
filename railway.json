@@ -1,7 +1,10 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "dockerfilePath": "backend/Dockerfile"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "backend/Dockerfile",
+    "buildContext": "backend",
+    "watchPatterns": ["backend/**"]
   },
   "deploy": {
     "startCommand": "gunicorn config.wsgi:application -c gunicorn.conf.py"
