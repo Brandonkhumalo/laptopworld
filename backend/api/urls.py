@@ -11,6 +11,7 @@ router.register(r'orders', views.OrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/register/', views.admin_register),
     path('auth/login/', views.admin_login),
     path('auth/logout/', views.admin_logout),
     path('auth/check/', views.admin_check),

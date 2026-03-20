@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, getMediaUrl } from "@/lib/api";
 import { getSpecSections } from "@/lib/specTemplates";
 import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon, Truck, MapPin, DollarSign } from "lucide-react";
 
 const logoImg = "/logo.png";
-
-const API_BASE = '';
 
 type Tab = 'categories' | 'products' | 'top-picks' | 'deals' | 'orders' | 'delivery';
 
@@ -409,7 +407,7 @@ function ProductsPanel() {
                     {existingImages.map((img) => (
                       <div key={img.id} className="relative group">
                         <img
-                          src={img.image.startsWith('http') ? img.image : `${API_BASE}${img.image}`}
+                          src={getMediaUrl(img.image)}
                           alt="Product"
                           className="h-16 w-16 object-cover rounded-lg border border-border"
                         />
@@ -487,7 +485,7 @@ function ProductsPanel() {
       <div className="space-y-3">
         {products.map((p) => (
           <div key={p.id} className="rounded-xl bg-card border border-border p-4 shadow-product flex items-center gap-4" data-testid={`card-admin-product-${p.id}`}>
-            {p.image && <img src={p.image.startsWith('http') ? p.image : `${API_BASE}${p.image}`} alt={p.name} className="h-16 w-16 object-contain rounded-lg bg-muted" />}
+            {p.image && <img src={getMediaUrl(p.image)} alt={p.name} className="h-16 w-16 object-contain rounded-lg bg-muted" />}
             {!p.image && <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></div>}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground truncate">{p.name}</h3>

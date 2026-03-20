@@ -24,7 +24,24 @@
       "Bash(pip install:*)",
       "Bash(python manage.py makemigrations)",
       "Bash(pip freeze:*)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(docker-compose exec:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh.exe pr:*)",
+      "Bash(where gh:*)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(find 'd:\\\\Tishanyq Digital\\\\laptopworld' -type f \\\\\\(-iname *dockerfile* -o -iname *docker-compose* -o -iname .dockerignore \\\\\\))",
+      "Bash(cp admin.html admin/index.html)",
+      "Bash(cp amenities.html amenities/index.html)",
+      "Bash(cp cart.html cart/index.html)",
+      "Bash(cp deals.html deals/index.html)",
+      "Bash(cp shop.html shop/index.html)",
+      "Bash(cp wishlist.html wishlist/index.html)",
+      "Bash(cp admin/dashboard.html admin/dashboard/index.html)",
+      "Bash(cp admin/register.html admin/register/index.html)",
+      "Bash(OUT=\"d:/Tishanyq Digital/laptopworld/out\")",
+      "Read(//d/Tishanyq Digital/laptopworld/$OUT/**)"
     ]
   }
 }

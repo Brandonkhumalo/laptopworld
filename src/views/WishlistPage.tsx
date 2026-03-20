@@ -4,10 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useCart } from "@/hooks/use-cart";
+import { getMediaUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const API_BASE = '';
 
 const WishlistPage = () => {
   const { items, removeFromWishlist } = useWishlist();
@@ -46,7 +45,7 @@ const WishlistPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {items.map((item) => {
-              const imageUrl = item.image ? (item.image.startsWith('http') ? item.image : `${API_BASE}${item.image}`) : null;
+              const imageUrl = item.image ? getMediaUrl(item.image) : null;
               const price = item.deal_price ? parseFloat(item.deal_price) : parseFloat(item.price);
               const originalPrice = item.deal_price ? parseFloat(item.price) : null;
 

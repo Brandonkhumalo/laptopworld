@@ -8,10 +8,9 @@ import { api } from "@/lib/api";
 import { specsToGrouped } from "@/lib/specTemplates";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { getMediaUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const API_BASE = '';
 
 interface ProductImageData {
   id: number;
@@ -43,7 +42,7 @@ interface Product {
 
 function getImageUrl(img: string | null) {
   if (!img) return null;
-  return img.startsWith('http') ? img : `${API_BASE}${img}`;
+  return getMediaUrl(img);
 }
 
 const ProductPage = () => {

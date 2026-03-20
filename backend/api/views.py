@@ -36,6 +36,55 @@ class IsAdminUser(permissions.BasePermission):
         return request.user and request.user.is_staff
 
 
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def admin_register(request):
+    from django.contrib.auth.models import User
+
+    username = request.data.get('username', '').strip()
+    email = request.data.get('email', '').strip()
+    password = request.data.get('password', '')
+    confirm_password = request.data.get('confirm_password', '')
+
+    if not all([username, email, password, confirm_password]):
+        return Response({'error': 'All fields are required'}, status=400)
+
+    if len(username) < 3 or len(username) > 30:
+        return Response({'error': 'Username must be between 3 and 30 characters'}, status=400)
+
+    if not re.match(r'^[a-zA-Z0-9_]+$', username):
+        return Response({'error': 'Username can only contain letters, numbers, and underscores'}, status=400)
+
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return Response({'error': 'Invalid email address'}, status=400)
+
+    if len(password) < 8:
+        return Response({'error': 'Password must be at least 8 characters'}, status=400)
+
+    if password != confirm_password:
+        return Response({'error': 'Passwords do not match'}, status=400)
+
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already taken'}, status=400)
+
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already registered'}, status=400)
+
+    user = User.objects.create_user(username=username, email=email, password=password)
+    user.is_staff = True
+    user.save()
+
+    token, _ = Token.objects.get_or_create(user=user)
+    logger.info(f"Admin registered: {username} from {request.META.get('REMOTE_ADDR')}")
+
+    return Response({
+        'message': 'Admin account created successfully',
+        'username': user.username,
+        'token': token.key,
+    }, status=201)
+
+
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])

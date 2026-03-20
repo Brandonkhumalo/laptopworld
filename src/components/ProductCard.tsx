@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { getMediaUrl } from "@/lib/api";
 import Link from "next/link";
 
 interface ProductCardProps {
@@ -19,8 +20,6 @@ interface ProductCardProps {
   index: number;
 }
 
-const API_BASE = '';
-
 const ProductCard = ({ id, image, name, category, price, originalPrice, dealPrice, savePercentage, badge, index }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -29,7 +28,7 @@ const ProductCard = ({ id, image, name, category, price, originalPrice, dealPric
   const discount = savePercentage ? Math.round(savePercentage) : (showOriginal ? Math.round(((showOriginal - displayPrice) / showOriginal) * 100) : 0);
   const wishlisted = isInWishlist(id);
 
-  const imageUrl = image ? (image.startsWith('http') ? image : `${API_BASE}${image}`) : null;
+  const imageUrl = image ? getMediaUrl(image) : null;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();

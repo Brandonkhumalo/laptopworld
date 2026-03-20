@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Lock, User } from "lucide-react";
+import Link from "next/link";
 
 const logoImg = "/logo.png";
 
@@ -84,6 +85,13 @@ const AdminLogin = () => {
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <a href="/admin/register/" className="text-accent hover:underline font-medium">
+              Create one
+            </a>
+          </p>
         </form>
       </div>
     </div>

@@ -4,12 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ArrowLeft, Loader2, MapPin, Truck, Store } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
-import { api } from "@/lib/api";
+import { api, getMediaUrl } from "@/lib/api";
 import AddressPicker from "@/components/AddressPicker";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const API_BASE = '';
 
 interface DeliveryFees {
   harare_fee: string;
@@ -95,7 +93,7 @@ const CartPage = () => {
             <div className="lg:col-span-2 space-y-3">
               {items.map((item) => {
                 const price = item.product.deal_price ? parseFloat(item.product.deal_price) : parseFloat(item.product.price);
-                const imageUrl = item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${API_BASE}${item.product.image}`) : null;
+                const imageUrl = item.product.image ? getMediaUrl(item.product.image) : null;
                 return (
                   <div key={item.id} className="rounded-xl bg-card border border-border p-4 shadow-product flex items-center gap-4" data-testid={`card-cart-item-${item.id}`}>
                     {imageUrl && <img src={imageUrl} alt={item.product.name} className="h-20 w-20 object-contain rounded-lg bg-muted" />}

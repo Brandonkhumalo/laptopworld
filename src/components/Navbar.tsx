@@ -289,6 +289,18 @@ const Navbar = () => {
                       <Phone className="h-4 w-4 text-accent" />
                       0771 796 666
                     </a>
+                    <a href="tel:+2632427618168" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
+                      <Phone className="h-4 w-4 text-accent" />
+                      0242 761 816-8
+                    </a>
+                    <a href="tel:+263719004400" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
+                      <Phone className="h-4 w-4 text-accent" />
+                      0719 004 400
+                    </a>
+                    <a href="tel:+263719700555" className="flex items-center gap-3 text-sm text-foreground hover:text-accent transition-colors">
+                      <Phone className="h-4 w-4 text-accent" />
+                      0719 700 555/4
+                    </a>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 text-accent shrink-0" />
                       First St & George Silundika, Harare (inside Econet shop)

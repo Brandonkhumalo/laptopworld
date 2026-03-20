@@ -70,6 +70,15 @@ const ContactMapSection = () => (
               <a href="tel:+263771796666" className="text-sm text-muted-foreground block hover:text-accent transition-colors">
                 0771 796 666
               </a>
+              <a href="tel:+2632427618168" className="text-sm text-muted-foreground block hover:text-accent transition-colors">
+                0242 761 816-8
+              </a>
+              <a href="tel:+263719004400" className="text-sm text-muted-foreground block hover:text-accent transition-colors">
+                0719 004 400
+              </a>
+              <a href="tel:+263719700555" className="text-sm text-muted-foreground block hover:text-accent transition-colors">
+                0719 700 555/4
+              </a>
             </div>
           </div>
 

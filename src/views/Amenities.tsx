@@ -47,6 +47,8 @@ const zbLogo = "/images/zb.jpg";
 const cbzLogo = "/images/cbz.png";
 const nbsLogo = "/images/nbs.png";
 const econetLogo = "/images/econet.png";
+const posbLogo = "/images/posb_logo.png";
+const tnCybertechLogo = "/images/tn-cybertech.png";
 
 /* ──────────────────────────────────────────────
  * Partner data — keeps the JSX clean by mapping
@@ -56,6 +58,8 @@ const partners = [
   { name: "ZB Bank", logo: zbLogo },
   { name: "CBZ", logo: cbzLogo },
   { name: "NBS Bank", logo: nbsLogo },
+  { name: "POSB", logo: posbLogo },
+  { name: "TN Cybertech", logo: tnCybertechLogo },
   { name: "Econet Wireless", logo: econetLogo },
 ];
 
@@ -279,7 +283,7 @@ const Amenities = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-5xl mx-auto">
             {partners.map((partner, i) => (
               <motion.div
                 key={partner.name}

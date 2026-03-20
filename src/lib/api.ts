@@ -1,4 +1,11 @@
-const API_BASE = '/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE = `${BACKEND_URL}/api`;
+
+export function getMediaUrl(path: string): string {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}${path}`;
+}
 
 function getCartSession(): string {
   let session = localStorage.getItem('cart_session');
@@ -110,6 +117,11 @@ export const api = {
     updateStatus: (id: number, status: string) => apiFetch(`/orders/${id}/update_status/`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   },
   auth: {
+    register: async (username: string, email: string, password: string, confirm_password: string) => {
+      const data = await apiFetch('/auth/register/', { method: 'POST', body: JSON.stringify({ username, email, password, confirm_password }) });
+      if (data.token) setAdminToken(data.token);
+      return data;
+    },
     login: async (username: string, password: string) => {
       const data = await apiFetch('/auth/login/', { method: 'POST', body: JSON.stringify({ username, password }) });
       if (data.token) setAdminToken(data.token);
