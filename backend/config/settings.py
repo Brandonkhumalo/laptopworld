@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:postgres@localhost:5432/laptopworld',
+        default='postgresql://postgres:dOgpYEhSVejLgFctlZhjOURvjwmOfXzX@postgres.railway.internal:5432/railway',
         conn_max_age=600,
     )
 }
