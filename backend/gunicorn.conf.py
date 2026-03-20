@@ -4,8 +4,8 @@ import multiprocessing
 import os
 bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 
-# Workers = (2 * CPU cores) + 1 — good starting point
-workers = multiprocessing.cpu_count() * 2 + 1
+# Use 2 workers on Railway to avoid OOM, configurable via env var
+workers = int(os.environ.get('WEB_CONCURRENCY', '2'))
 
 # Each worker gets 2 threads for handling concurrent I/O (DB queries, PayNow API calls)
 threads = 2
@@ -22,5 +22,5 @@ accesslog = "-"
 errorlog = "-"
 loglevel = "info"
 
-# Preload app for faster worker startup and shared memory
-preload_app = True
+# Disable preload so errors show in logs instead of silent crashes
+preload_app = False
