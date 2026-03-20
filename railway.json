@@ -6,6 +6,6 @@
     "watchPatterns": ["backend/**", "railway.json"]
   },
   "deploy": {
-    "startCommand": "python manage.py migrate --noinput && gunicorn config.wsgi:application -c gunicorn.conf.py"
+    "startCommand": "python manage.py migrate --noinput && echo 'Migrations complete, starting gunicorn on port '$PORT && gunicorn config.wsgi:application -c gunicorn.conf.py"
   }
 }
