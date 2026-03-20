@@ -11,7 +11,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend files
@@ -25,5 +25,5 @@ RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
 EXPOSE 8000
 
-# Run with Gunicorn using config file
-CMD ["gunicorn", "config.wsgi:application", "-c", "gunicorn.conf.py"]
+# Run with Gunicorn
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:${PORT:-8000}", "--workers", "2", "--timeout", "30", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug"]
