@@ -18,7 +18,7 @@ timeout = 30
 max_requests = 1000
 max_requests_jitter = 50
 
-# Log to stdout/stderr for Docker
+# Log to stdout/stderr for Railway
 accesslog = "-"
 errorlog = "-"
 loglevel = "info"
