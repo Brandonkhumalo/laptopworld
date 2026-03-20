@@ -27,7 +27,17 @@ interface Category {
 
 const CategoryPage = () => {
   const params = useParams();
-  const id = params.id as string;
+  const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const segments = window.location.pathname.replace(/\/+$/, '').split('/');
+    const urlId = segments[segments.length - 1];
+    if (urlId && urlId !== '0') {
+      setId(urlId);
+    } else {
+      setId(params.id as string);
+    }
+  }, [params.id]);
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);

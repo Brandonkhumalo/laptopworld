@@ -47,7 +47,18 @@ function getImageUrl(img: string | null) {
 
 const ProductPage = () => {
   const params = useParams();
-  const id = params.id as string;
+  const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Read ID from URL path to work with static export on cPanel
+    const segments = window.location.pathname.replace(/\/+$/, '').split('/');
+    const urlId = segments[segments.length - 1];
+    if (urlId && urlId !== '0') {
+      setId(urlId);
+    } else {
+      setId(params.id as string);
+    }
+  }, [params.id]);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);

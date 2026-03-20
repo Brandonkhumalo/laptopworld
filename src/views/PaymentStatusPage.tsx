@@ -21,7 +21,17 @@ interface OrderData {
 
 const PaymentStatusPage = () => {
   const params = useParams();
-  const orderNumber = params.orderNumber as string;
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    const segments = window.location.pathname.replace(/\/+$/, '').split('/');
+    const urlId = segments[segments.length - 1];
+    if (urlId && urlId !== '0') {
+      setOrderNumber(urlId);
+    } else {
+      setOrderNumber(params.orderNumber as string);
+    }
+  }, [params.orderNumber]);
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(true);
