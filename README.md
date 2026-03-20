@@ -17,7 +17,7 @@ E-commerce platform for **Laptop World Zimbabwe** — selling laptops, cellphone
 - **Admin Dashboard** — Manage products, categories, orders, and deals
 - **Deals & Promotions** — Time-limited deals with discount pricing
 - **Responsive Design** — Mobile-first UI with shadcn/ui components and Framer Motion animations
-- **Email Notifications** — Order confirmation and status updates via Resend
+- **Email Notifications** — Order confirmation and status updates via Resend.
 
 ## Tech Stack
 
