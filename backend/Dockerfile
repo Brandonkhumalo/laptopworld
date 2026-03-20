@@ -11,11 +11,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
-COPY . .
+# Copy only backend files
+COPY backend/ .
 
 # Create required directories
 RUN mkdir -p /app/logs /app/media

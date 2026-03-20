@@ -1,0 +1,6 @@
+[build]
+dockerfilePath = "backend/Dockerfile"
+watchPatterns = ["backend/**"]
+
+[deploy]
+startCommand = "gunicorn config.wsgi:application -c gunicorn.conf.py"
