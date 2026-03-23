@@ -40,19 +40,25 @@ class ProductSerializer(serializers.ModelSerializer):
     deal_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     active_deal = DealSerializer(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
-    image = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['id', 'name', 'category', 'category_name', 'category_type', 'price', 'description',
-                  'key_features', 'specifications', 'image', 'images', 'badge', 'stock', 'sku',
+                  'key_features', 'specifications', 'image', 'image_url', 'images', 'badge', 'stock', 'sku',
                   'condition', 'warranty', 'brand',
                   'deal_price', 'active_deal', 'created_at']
 
-    def get_image(self, obj):
+    def get_image_url(self, obj):
         if obj.image:
             return '/' + obj.image.url.lstrip('/')
         return None
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Replace 'image' (file path) with the formatted URL, and remove image_url
+        ret['image'] = ret.pop('image_url')
+        return ret
 
 
 class TopPickSerializer(serializers.ModelSerializer):
