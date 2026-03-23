@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, getMediaUrl } from "@/lib/api";
 import { getSpecSections } from "@/lib/specTemplates";
-import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon, Truck, MapPin, DollarSign } from "lucide-react";
+import { LogOut, Tag, Package, Star, Percent, ShoppingBag, Plus, Trash2, Edit, X, ChevronDown, Upload, Image as ImageIcon, Truck, MapPin, DollarSign, Loader2 } from "lucide-react";
 
 const logoImg = "/logo.png";
 
@@ -136,27 +136,33 @@ function CategoriesPanel() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = () => api.categories.list().then(setCategories);
   useEffect(() => { load(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const meta = inferCategoryMeta(name);
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('icon', meta.icon);
-    formData.append('category_type', meta.type);
-    if (editId) await api.categories.update(editId, formData);
-    else await api.categories.create(formData);
-    setShowForm(false); setName(''); setEditId(null);
-    load();
+    setSaving(true);
+    try {
+      const meta = inferCategoryMeta(name);
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('icon', meta.icon);
+      formData.append('category_type', meta.type);
+      if (editId) await api.categories.update(editId, formData);
+      else await api.categories.create(formData);
+      setShowForm(false); setName(''); setEditId(null);
+      load();
+    } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this category?')) return;
-    await api.categories.delete(id);
-    load();
+    setDeletingId(id);
+    try { await api.categories.delete(id); load(); }
+    finally { setDeletingId(null); }
   };
 
   return (
@@ -178,7 +184,10 @@ function CategoriesPanel() {
           {name && (
             <p className="text-xs text-muted-foreground">Auto-detected: {inferCategoryMeta(name).icon} icon · {inferCategoryMeta(name).type} type</p>
           )}
-          <button type="submit" className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground" data-testid="button-save-category">Save</button>
+          <button type="submit" disabled={saving} className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground disabled:opacity-50 flex items-center gap-2" data-testid="button-save-category">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? 'Saving...' : 'Save'}
+          </button>
         </form>
       )}
 
@@ -191,7 +200,9 @@ function CategoriesPanel() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setEditId(cat.id); setName(cat.name); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-muted" data-testid={`button-edit-category-${cat.id}`}><Edit className="h-4 w-4" /></button>
-              <button onClick={() => handleDelete(cat.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive" data-testid={`button-delete-category-${cat.id}`}><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => handleDelete(cat.id)} disabled={deletingId === cat.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive disabled:opacity-50" data-testid={`button-delete-category-${cat.id}`}>
+                {deletingId === cat.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              </button>
             </div>
           </div>
         ))}
@@ -215,6 +226,8 @@ function ProductsPanel() {
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [selectedCategoryType, setSelectedCategoryType] = useState('other');
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = () => {
     api.products.list().then((data: { results?: Product[] }) => setProducts(Array.isArray(data) ? data : data.results || []));
@@ -234,36 +247,39 @@ function ProductsPanel() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const fd = new FormData();
-    fd.append('name', formData.name);
-    fd.append('category', formData.category);
-    fd.append('price', formData.price);
-    fd.append('description', formData.description);
-    fd.append('badge', formData.badge);
-    fd.append('stock', formData.stock);
-    fd.append('condition', formData.condition);
-    fd.append('warranty', formData.warranty);
-    fd.append('brand', formData.brand);
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append('name', formData.name);
+      fd.append('category', formData.category);
+      fd.append('price', formData.price);
+      fd.append('description', formData.description);
+      fd.append('badge', formData.badge);
+      fd.append('stock', formData.stock);
+      fd.append('condition', formData.condition);
+      fd.append('warranty', formData.warranty);
+      fd.append('brand', formData.brand);
 
-    const filteredFeatures = keyFeatures.filter(f => f.trim());
-    fd.append('key_features', JSON.stringify(filteredFeatures));
+      const filteredFeatures = keyFeatures.filter(f => f.trim());
+      fd.append('key_features', JSON.stringify(filteredFeatures));
 
-    const filteredSpecs: Record<string, string> = {};
-    for (const [k, v] of Object.entries(specs)) {
-      if (v && v.trim()) filteredSpecs[k] = v.trim();
-    }
-    fd.append('specifications', JSON.stringify(filteredSpecs));
+      const filteredSpecs: Record<string, string> = {};
+      for (const [k, v] of Object.entries(specs)) {
+        if (v && v.trim()) filteredSpecs[k] = v.trim();
+      }
+      fd.append('specifications', JSON.stringify(filteredSpecs));
 
-    if (mainImage) fd.append('image', mainImage);
-    for (const img of additionalImages) {
-      fd.append('additional_images', img);
-    }
+      if (mainImage) fd.append('image', mainImage);
+      for (const img of additionalImages) {
+        fd.append('additional_images', img);
+      }
 
-    if (editId) await api.products.update(editId, fd);
-    else await api.products.create(fd);
+      if (editId) await api.products.update(editId, fd);
+      else await api.products.create(fd);
 
-    resetForm();
-    load();
+      resetForm();
+      load();
+    } finally { setSaving(false); }
   };
 
   const resetForm = () => {
@@ -280,8 +296,9 @@ function ProductsPanel() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this product?')) return;
-    await api.products.delete(id);
-    load();
+    setDeletingId(id);
+    try { await api.products.delete(id); load(); }
+    finally { setDeletingId(null); }
   };
 
   const handleDeleteImage = async (imageId: number) => {
@@ -324,10 +341,17 @@ function ProductsPanel() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-xl bg-card border border-border p-4 mb-4 space-y-4" data-testid="form-product">
+        <form onSubmit={handleSubmit} className="rounded-xl bg-card border border-border p-4 mb-4 space-y-4 relative" data-testid="form-product">
+          {saving && (
+            <div className="absolute inset-0 bg-card/80 backdrop-blur-sm rounded-xl z-10 flex flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-accent" />
+              <p className="text-sm font-medium text-foreground">{editId ? 'Updating product...' : 'Adding product...'}</p>
+              <p className="text-xs text-muted-foreground">Uploading images and saving data</p>
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <h3 className="font-semibold text-lg">{editId ? 'Edit' : 'Add'} Product</h3>
-            <button type="button" onClick={resetForm}><X className="h-5 w-5" /></button>
+            <button type="button" onClick={resetForm} disabled={saving}><X className="h-5 w-5" /></button>
           </div>
 
           <div className="space-y-4">
@@ -476,8 +500,9 @@ function ProductsPanel() {
             )}
           </div>
 
-          <button type="submit" className="gradient-accent px-6 py-2.5 rounded-lg text-sm font-medium text-secondary-foreground" data-testid="button-save-product">
-            {editId ? 'Update Product' : 'Add Product'}
+          <button type="submit" disabled={saving} className="gradient-accent px-6 py-2.5 rounded-lg text-sm font-medium text-secondary-foreground disabled:opacity-50 flex items-center gap-2" data-testid="button-save-product">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? (editId ? 'Updating...' : 'Adding Product...') : (editId ? 'Update Product' : 'Add Product')}
           </button>
         </form>
       )}
@@ -498,7 +523,9 @@ function ProductsPanel() {
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={() => startEdit(p)} className="p-1.5 rounded-lg hover:bg-muted" data-testid={`button-edit-product-${p.id}`}><Edit className="h-4 w-4" /></button>
-              <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive" data-testid={`button-delete-product-${p.id}`}><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => handleDelete(p.id)} disabled={deletingId === p.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive disabled:opacity-50" data-testid={`button-delete-product-${p.id}`}>
+                {deletingId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              </button>
             </div>
           </div>
         ))}
@@ -514,6 +541,8 @@ function TopPicksPanel() {
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [order, setOrder] = useState('0');
+  const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   const load = () => {
     api.topPicks.list().then(setTopPicks);
@@ -523,14 +552,18 @@ function TopPicksPanel() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.topPicks.create({ product_id: parseInt(selectedProduct), order: parseInt(order), active: true });
-    setShowForm(false); setSelectedProduct(''); setOrder('0');
-    load();
+    setSaving(true);
+    try {
+      await api.topPicks.create({ product_id: parseInt(selectedProduct), order: parseInt(order), active: true });
+      setShowForm(false); setSelectedProduct(''); setOrder('0');
+      load();
+    } finally { setSaving(false); }
   };
 
   const handleRemove = async (id: number) => {
-    await api.topPicks.delete(id);
-    load();
+    setRemovingId(id);
+    try { await api.topPicks.delete(id); load(); }
+    finally { setRemovingId(null); }
   };
 
   return (
@@ -553,7 +586,10 @@ function TopPicksPanel() {
             {products.filter((p) => !topPicks.some((tp) => tp.product.id === p.id)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <input type="number" value={order} onChange={(e) => setOrder(e.target.value)} placeholder="Display order" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" data-testid="input-top-pick-order" />
-          <button type="submit" className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground" data-testid="button-save-top-pick">Add</button>
+          <button type="submit" disabled={saving} className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground disabled:opacity-50 flex items-center gap-2" data-testid="button-save-top-pick">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? 'Adding...' : 'Add'}
+          </button>
         </form>
       )}
 
@@ -564,7 +600,9 @@ function TopPicksPanel() {
               <h3 className="font-semibold text-foreground">#{tp.order} — {tp.product.name}</h3>
               <p className="text-xs text-muted-foreground">${tp.product.deal_price || tp.product.price}</p>
             </div>
-            <button onClick={() => handleRemove(tp.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive" data-testid={`button-remove-top-pick-${tp.id}`}><Trash2 className="h-4 w-4" /></button>
+            <button onClick={() => handleRemove(tp.id)} disabled={removingId === tp.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive disabled:opacity-50" data-testid={`button-remove-top-pick-${tp.id}`}>
+              {removingId === tp.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            </button>
           </div>
         ))}
         {topPicks.length === 0 && <p className="text-center text-muted-foreground py-8">No top picks set. Add products to feature on the homepage.</p>}
@@ -581,6 +619,9 @@ function DealsPanel() {
   const [dealPrice, setDealPrice] = useState('');
   const [savePercent, setSavePercent] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   const load = () => {
     api.deals.list().then(setDeals);
@@ -610,22 +651,27 @@ function DealsPanel() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const dealData: Record<string, unknown> = { product: parseInt(selectedProduct), deal_price: dealPrice, save_percentage: savePercent, active: true };
-    if (endDate) dealData.end_date = new Date(endDate).toISOString();
-    await api.deals.create(dealData);
-    setShowForm(false); setSelectedProduct(''); setDealPrice(''); setSavePercent(''); setEndDate('');
-    load();
+    setSaving(true);
+    try {
+      const dealData: Record<string, unknown> = { product: parseInt(selectedProduct), deal_price: dealPrice, save_percentage: savePercent, active: true };
+      if (endDate) dealData.end_date = new Date(endDate).toISOString();
+      await api.deals.create(dealData);
+      setShowForm(false); setSelectedProduct(''); setDealPrice(''); setSavePercent(''); setEndDate('');
+      load();
+    } finally { setSaving(false); }
   };
 
   const toggleDeal = async (deal: Deal) => {
-    await api.deals.update(deal.id, { active: !deal.active });
-    load();
+    setTogglingId(deal.id);
+    try { await api.deals.update(deal.id, { active: !deal.active }); load(); }
+    finally { setTogglingId(null); }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this deal?')) return;
-    await api.deals.delete(id);
-    load();
+    setDeletingId(id);
+    try { await api.deals.delete(id); load(); }
+    finally { setDeletingId(null); }
   };
 
   return (
@@ -655,7 +701,10 @@ function DealsPanel() {
             <label className="text-xs text-muted-foreground block mb-1">Deal end date (optional — controls countdown timer)</label>
             <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" data-testid="input-deal-end-date" />
           </div>
-          <button type="submit" className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground" data-testid="button-save-deal">Save Deal</button>
+          <button type="submit" disabled={saving} className="gradient-accent px-4 py-2 rounded-lg text-sm font-medium text-secondary-foreground disabled:opacity-50 flex items-center gap-2" data-testid="button-save-deal">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? 'Saving...' : 'Save Deal'}
+          </button>
         </form>
       )}
 
@@ -667,10 +716,13 @@ function DealsPanel() {
               <p className="text-xs text-muted-foreground">Deal: ${d.deal_price} · Save {d.save_percentage}%</p>
             </div>
             <div className="flex gap-2 items-center">
-              <button onClick={() => toggleDeal(d)} className={`px-3 py-1 rounded-full text-xs font-medium ${d.active ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'}`} data-testid={`button-toggle-deal-${d.id}`}>
+              <button onClick={() => toggleDeal(d)} disabled={togglingId === d.id} className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${d.active ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'} disabled:opacity-50`} data-testid={`button-toggle-deal-${d.id}`}>
+                {togglingId === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
                 {d.active ? 'Active' : 'Inactive'}
               </button>
-              <button onClick={() => handleDelete(d.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive" data-testid={`button-delete-deal-${d.id}`}><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => handleDelete(d.id)} disabled={deletingId === d.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive disabled:opacity-50" data-testid={`button-delete-deal-${d.id}`}>
+                {deletingId === d.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              </button>
             </div>
           </div>
         ))}
@@ -686,6 +738,7 @@ function OrdersPanel() {
   const [fulfillmentFilter, setFulfillmentFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const load = () => {
     api.orders.list({
@@ -697,8 +750,10 @@ function OrdersPanel() {
   useEffect(() => { load(); }, [statusFilter, fulfillmentFilter, searchQuery]);
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
-    await api.orders.updateStatus(orderId, newStatus);
-    load();
+    const key = `${orderId}-${newStatus}`;
+    setUpdatingStatus(key);
+    try { await api.orders.updateStatus(orderId, newStatus); load(); }
+    finally { setUpdatingStatus(null); }
   };
 
   const statusColors: Record<string, string> = {
@@ -800,17 +855,29 @@ function OrdersPanel() {
                   <span className="text-sm text-muted-foreground mr-2">Update status:</span>
                   {order.fulfillment_type === 'delivery' ? (
                     <>
-                      <button onClick={() => handleStatusUpdate(order.id, 'processing')} className="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-700 hover:bg-blue-500/30" data-testid={`button-status-processing-${order.id}`}>Processing</button>
-                      <button onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')} className="px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-700 hover:bg-purple-500/30" data-testid={`button-status-out-${order.id}`}>Out for Delivery</button>
-                      <button onClick={() => handleStatusUpdate(order.id, 'delivered')} className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-700 hover:bg-green-500/30" data-testid={`button-status-delivered-${order.id}`}>Delivered</button>
+                      <button onClick={() => handleStatusUpdate(order.id, 'processing')} disabled={updatingStatus === `${order.id}-processing`} className="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-700 hover:bg-blue-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-processing-${order.id}`}>
+                        {updatingStatus === `${order.id}-processing` && <Loader2 className="h-3 w-3 animate-spin" />} Processing
+                      </button>
+                      <button onClick={() => handleStatusUpdate(order.id, 'out_for_delivery')} disabled={updatingStatus === `${order.id}-out_for_delivery`} className="px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-700 hover:bg-purple-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-out-${order.id}`}>
+                        {updatingStatus === `${order.id}-out_for_delivery` && <Loader2 className="h-3 w-3 animate-spin" />} Out for Delivery
+                      </button>
+                      <button onClick={() => handleStatusUpdate(order.id, 'delivered')} disabled={updatingStatus === `${order.id}-delivered`} className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-700 hover:bg-green-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-delivered-${order.id}`}>
+                        {updatingStatus === `${order.id}-delivered` && <Loader2 className="h-3 w-3 animate-spin" />} Delivered
+                      </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleStatusUpdate(order.id, 'processing')} className="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-700 hover:bg-blue-500/30" data-testid={`button-status-processing-${order.id}`}>Processing</button>
-                      <button onClick={() => handleStatusUpdate(order.id, 'collected')} className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-700 hover:bg-green-500/30" data-testid={`button-status-collected-${order.id}`}>Collected</button>
+                      <button onClick={() => handleStatusUpdate(order.id, 'processing')} disabled={updatingStatus === `${order.id}-processing`} className="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-700 hover:bg-blue-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-processing-${order.id}`}>
+                        {updatingStatus === `${order.id}-processing` && <Loader2 className="h-3 w-3 animate-spin" />} Processing
+                      </button>
+                      <button onClick={() => handleStatusUpdate(order.id, 'collected')} disabled={updatingStatus === `${order.id}-collected`} className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-700 hover:bg-green-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-collected-${order.id}`}>
+                        {updatingStatus === `${order.id}-collected` && <Loader2 className="h-3 w-3 animate-spin" />} Collected
+                      </button>
                     </>
                   )}
-                  <button onClick={() => handleStatusUpdate(order.id, 'cancelled')} className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-700 hover:bg-red-500/30" data-testid={`button-status-cancelled-${order.id}`}>Cancel</button>
+                  <button onClick={() => handleStatusUpdate(order.id, 'cancelled')} disabled={updatingStatus === `${order.id}-cancelled`} className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-700 hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-1" data-testid={`button-status-cancelled-${order.id}`}>
+                    {updatingStatus === `${order.id}-cancelled` && <Loader2 className="h-3 w-3 animate-spin" />} Cancel
+                  </button>
                 </div>
               </div>
             )}
@@ -912,6 +979,7 @@ function DeliverySettingsPanel() {
           className="w-full gradient-accent py-2.5 rounded-lg font-semibold text-secondary-foreground disabled:opacity-50 flex items-center justify-center gap-2"
           data-testid="button-save-delivery-settings"
         >
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Delivery Fees'}
         </button>
       </div>

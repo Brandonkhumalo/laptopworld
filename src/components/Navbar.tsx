@@ -250,6 +250,14 @@ const Navbar = () => {
           </div>
 
           <Link
+            href="/about"
+            className="text-sm font-medium py-2 transition-colors duration-200 text-primary-foreground/80 hover:text-accent"
+            data-testid="link-about"
+          >
+            About
+          </Link>
+
+          <Link
             href="/amenities"
             className="text-sm font-medium py-2 transition-colors duration-200 text-primary-foreground/80 hover:text-accent"
             data-testid="link-amenities"
@@ -414,6 +422,14 @@ const Navbar = () => {
                 data-testid="link-mobile-categories"
               >
                 Categories
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setMobileOpen(false)}
+                className="text-primary-foreground/80 hover:text-accent py-2 border-b border-primary-foreground/10 transition-colors"
+                data-testid="link-mobile-about"
+              >
+                About
               </Link>
               <Link
                 href="/amenities"
