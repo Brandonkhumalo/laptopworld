@@ -38,6 +38,9 @@ MIDDLEWARE = [
 
 _cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5000,http://localhost:3000')
 CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+_cors_origin_regexes = os.environ.get('CORS_ALLOWED_ORIGIN_REGEXES', '')
+CORS_ALLOWED_ORIGIN_REGEXES = [o.strip() for o in _cors_origin_regexes.split(',') if o.strip()]
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False').lower() in ('true', '1', 'yes')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -50,7 +53,6 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
     'x-cart-session',
-    'authorization',
 ]
 
 REST_FRAMEWORK = {
