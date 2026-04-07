@@ -36,12 +36,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-_cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5000,http://localhost:3000')
-CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
-_cors_origin_regexes = os.environ.get('CORS_ALLOWED_ORIGIN_REGEXES', '')
-CORS_ALLOWED_ORIGIN_REGEXES = [o.strip() for o in _cors_origin_regexes.split(',') if o.strip()]
-CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False').lower() in ('true', '1', 'yes')
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -92,11 +88,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+_database_url = (
+    os.environ.get('DATABASE_URL')
+    or os.environ.get('DATABASE_PUBLIC_URL')
+    or 'sqlite:///db.sqlite3'
+)
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'),
-        conn_max_age=600,
-    )
+    'default': dj_database_url.parse(_database_url, conn_max_age=600, ssl_require=_database_url.startswith('postgres'))
 }
 
 AUTH_PASSWORD_VALIDATORS = [
