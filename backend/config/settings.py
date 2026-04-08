@@ -36,8 +36,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'https://laptopworld.co.zw,http://localhost:3000,http://localhost:5000'
+    ).split(',') if o.strip()
+]
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
